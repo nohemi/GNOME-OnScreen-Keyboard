@@ -62,7 +62,7 @@ fi
 # iso-codes, libical, libxml2, ORBit2, pam, python, readline,
 # spidermonkey ({mozilla,firefox,xulrunner}-js), startup-notification,
 # xdamage, icon-naming-utils, upower, libtool-ltdl, libvorbis,
-# libgcrypt, libtasn1, libgnome-keyring, libgtop, cups,
+# libgcrypt, libtasn1, libgnome-keyring, libgtop, cups, xcb,
 # libusb, libproxy, libdb, libproxy, sqlite, gudev, lcms2, sane
 #
 # Non-devel packages needed by gnome-shell and its deps:
@@ -84,6 +84,7 @@ if test "x$system" = xUbuntu -o "x$system" = xDebian -o "x$system" = xLinuxMint 
     libltdl-dev libvorbis-dev iso-codes libgnome-keyring-dev libusb-1.0-0-dev
     libupower-glib-dev libcups2-dev libproxy-dev libdb-dev libproxy-dev
     libsqlite3-dev libgudev-1.0-dev libsane-dev
+    libx11-xcb-dev libxcb-event1-dev libxcb-aux0-dev
     "
 
   if apt-cache show autopoint > /dev/null 2> /dev/null; then
@@ -122,7 +123,7 @@ if test "x$system" = xFedora ; then
     icon-naming-utils upower-devel libtool-ltdl-devel libvorbis-devel
     iso-codes-devel libgcrypt-devel libtasn1-devel libtasn1-tools libusb1-devel
     libgnome-keyring-devel libgtop2-devel cups-devel db4-devel libproxy-devel
-    sqlite-devel libgudev1-devel lcms2-devel sane-backends-devel
+    sqlite-devel libgudev1-devel lcms2-devel sane-backends-devel xcb-util-devel
     "
 
   if expr $version = 14 > /dev/null ; then
