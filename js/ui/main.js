@@ -18,6 +18,7 @@ const EndSessionDialog = imports.ui.endSessionDialog;
 const PolkitAuthenticationAgent = imports.ui.polkitAuthenticationAgent;
 const Environment = imports.ui.environment;
 const ExtensionSystem = imports.ui.extensionSystem;
+const Keyboard = imports.ui.keyboard;
 const MessageTray = imports.ui.messageTray;
 const Overview = imports.ui.overview;
 const Panel = imports.ui.panel;
@@ -59,6 +60,7 @@ let uiGroup = null;
 let magnifier = null;
 let xdndHandler = null;
 let statusIconDispatcher = null;
+let keyboard = null;
 let _errorLogStack = [];
 let _startDate;
 let _defaultCssStylesheet = null;
@@ -142,6 +144,9 @@ function start() {
 
     overview.init();
     statusIconDispatcher.start(messageTray.actor);
+
+    keyboard = new Keyboard.Keyboard();
+    keyboard.show();
 
     _startDate = new Date();
 

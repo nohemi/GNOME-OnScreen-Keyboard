@@ -522,6 +522,74 @@ shell_global_set_stage_input_mode (ShellGlobal         *global,
 }
 
 /**
+ * shell_global_fake_key_press:
+ * @global: the #ShellGlobal
+ * @key: the key to press
+ *
+ * This fakes a keypress event; either to the currently-focused actor
+ * in the shell chrome, or to the currently-focused X window, depending
+ * on the current #ShellGlobal:stage-input-mode.
+ */
+void
+shell_global_fake_key_press (ShellGlobal *global,
+                             gunichar     key)
+{
+  Display *xdisplay;
+  Window xwindow;
+  XKeyEvent xevent;
+  guint state;
+  char keystr[2];
+  KeySym keysym;
+  KeyCode keycode;
+
+  xdisplay = meta_plugin_get_xdisplay (global->plugin);
+
+  if (global->input_mode == SHELL_STAGE_INPUT_MODE_FULLSCREEN ||
+      global->input_mode == SHELL_STAGE_INPUT_MODE_FOCUSED)
+    {
+      ClutterActor *stage = meta_plugin_get_stage (global->plugin);
+
+      xwindow = clutter_x11_get_stage_window (CLUTTER_STAGE (stage));
+    }
+  else
+    {
+      MetaScreen *screen = meta_plugin_get_screen (global->plugin);
+      MetaDisplay *display = meta_screen_get_display (screen);
+      MetaWindow *focus = meta_display_get_focus_window (display);
+
+      /* FIXME: will this DTRT with override-redirect windows? */
+      if (!focus)
+        return;
+      xwindow = meta_window_get_xwindow (focus);
+    }
+
+  /* FIXME */
+  state = 0;
+  keystr[0] = key;
+  keystr[1] = '\0';
+  keysym = XStringToKeysym (keystr);
+  keycode = XKeysymToKeycode (xdisplay, keysym);
+
+  memset (&xevent, 0, sizeof (xevent));
+
+  xevent.type = KeyPress;
+  xevent.window = xwindow;
+  xevent.root = GDK_WINDOW_XID (gdk_screen_get_root_window (shell_global_get_gdk_screen (global)));
+  xevent.subwindow = None;
+  xevent.time = shell_global_get_current_time (global);
+  xevent.state = state;
+  xevent.keycode = keycode;
+  xevent.same_screen = True;
+  XSendEvent (xdisplay, xwindow, False, 0, (XEvent *)&xevent);
+
+  xevent.type = KeyRelease;
+  XSendEvent (xdisplay, xwindow, False, 0, (XEvent *)&xevent);
+
+
+
+}
+
+/**
  * shell_global_set_cursor:
  * @global: A #ShellGlobal
  * @type: the type of the cursor
