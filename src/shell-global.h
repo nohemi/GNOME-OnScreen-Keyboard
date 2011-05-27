@@ -58,6 +58,9 @@ void     shell_global_set_stage_input_mode   (ShellGlobal         *global,
 void     shell_global_set_stage_input_region (ShellGlobal         *global,
                                               GSList              *rectangles);
 
+void     shell_global_fake_key_press         (ShellGlobal         *global,
+                                              gunichar             key);
+
 /* X utilities */
 typedef enum {
   SHELL_CURSOR_DND_IN_DRAG,

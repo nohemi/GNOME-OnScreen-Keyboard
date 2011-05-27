@@ -1661,3 +1661,28 @@ StTooltip StLabel {
 .magnifier-zoom-region.full-screen {
     border-width: 0px;
 }
+
+/* On-screen Keyboard */
+
+#keyboard {
+    border: 1px solid white;
+    background: black;
+    spacing: 5px;
+    padding: 5px;
+}
+
+.keyboard-key {
+    min-height: 30px;
+    min-width: 30px;
+    border-radius: 5px;
+    border: 1px solid white;
+    color: white;
+}
+
+.keyboard-key:hover {
+    background: #303030
+}
+
+.keyboard-key:active {
+    background: #808080
+}
