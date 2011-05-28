@@ -1665,6 +1665,12 @@ StTooltip StLabel {
     padding: 5px;
 }
 
+.keyboard-row {
+    background: black;
+    spacing: 5px;
+    padding: 5px;
+}
+
 .keyboard-key {
     min-height: 30px;
     min-width: 30px;
