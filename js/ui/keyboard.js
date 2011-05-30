@@ -4,6 +4,7 @@ const Clutter = imports.gi.Clutter;
 const Lang = imports.lang;
 const St = imports.gi.St;
 const Shell = imports.gi.Shell;
+const Caribou = imports.gi.Caribou;
 
 const Main = imports.ui.main;
 
@@ -20,23 +21,52 @@ const Pretty_Keys = [
     {name: "Caribou_Alpha", button: new St.Button({ label: "Abc", style_class: 'keyboard-key'})}
 ]
 
-function Key(label) {
-    this._init(label);
+function Key(key) {
+    this._init(key);
 }
 
 Key.prototype = {
-    _init : function(label) {
-       this.label = label;
+    _init : function(key) {
+       this.key = key;
     },
 
     getSym : function() {
-        if (this.label.length > 1) {
-            for (var key = 0; key < Pretty_Keys.length; ++key) {
-                if (this.label == Pretty_Keys[key].name)
-                    return Pretty_Keys[key].button;
+        if (this.key.get_name().length > 1) {
+            for (var i = 0; i < Pretty_Keys.length; ++i) {
+                if (this.key.get_name() == Pretty_Keys[i].name)
+                    return Pretty_Keys[i].button;
             }
         }
-        return new St.Button({ label: this.label, style_class: 'keyboard-key'});
+        let label = new String (this.key.get_name());
+        let button = new St.Button({ label: label, style_class: 'keyboard-key'});
+        button.connect('clicked', function () { global.fake_key_press(label.charAt(0)); });
+        return button;
+     }
+};
+
+function Layout(level) {
+   this._init(level);
+}
+
+Layout.prototype = {
+    _init : function (level) {
+        this.box = new St.BoxLayout ({ name: 'keyboard-row'});
+        this.level = level;
+        this.loadRows();
+    },
+
+    addRows : function (keys) {
+        for each (key in keys) {
+            let button = new Key(key);
+            this.box.add(button.getSym());
+        }
+    },
+
+    loadRows : function () {
+        let rows = this.level.get_rows();
+        for each (row in rows) {
+           this.addRow(row.get_keys())
+        }
     }
 };
 
@@ -47,8 +77,7 @@ function Keyboard() {
 Keyboard.prototype = {
     _init: function () {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
-        let file_contents = Shell.get_file_contents_utf8_sync('/home/nohemi/gnome-shell/source/caribou/data/layouts/touch/us.json');
-        this.layout = JSON.parse(file_contents);
+        this.keyboard = new Caribou.KeyboardModel();
 
         this.addKeys();
 
@@ -69,13 +98,12 @@ Keyboard.prototype = {
     },
 
     addKeys: function () {
-        for (var row = 0; row < this.layout.level1.rows.length; ++row) {
-            let box = new St.BoxLayout ({name: 'keyboard-row' });
-            for (var key = 0; key < this.layout.level1.rows[row].length; ++key) {
-                let button = new Key(this.layout.level1.rows[row][key].name);
-                box.add(button.getSym());
-            }
-            this.actor.add_actor(box);
+        for each (gname in this.keyboard.get_groups()) {
+             group = this.keyboard.get_group(gname);
+             for each (lname in group.get_levels()) {
+                 let level = group.get_level(lname);
+                 let layout = Layout(level);
+             }
         }
     },
 
