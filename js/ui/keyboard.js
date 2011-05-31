@@ -102,7 +102,7 @@ Keyboard.prototype = {
              group = this.keyboard.get_group(gname);
              for each (lname in group.get_levels()) {
                  let level = group.get_level(lname);
-                 let layout = Layout(level);
+                 let layout = new Layout(level);
              }
         }
     },
