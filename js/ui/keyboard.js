@@ -95,6 +95,8 @@ Keyboard.prototype = {
         this.keyboard = new Caribou.KeyboardModel();
 
         this.groups = {};
+        this.current_page = null;
+
         this.addKeys();
 
         this.keyboard.connect("notify::active-group", Lang.bind(this,this._onGroupChanged));
@@ -105,7 +107,6 @@ Keyboard.prototype = {
                                            visibleInFullscreen: true,
                                            affectsStruts: false });
 
-        this.current_page = null;
         this._reposition();
     },
 
