@@ -10,16 +10,16 @@ const Caribou = imports.gi.Caribou;
 const Main = imports.ui.main;
 
 const Pretty_Keys = [
-    {name: "BackSpace", label: "\u232b"},
-    {name: "space", label: " "},
-    {name: "Return", label: "\u23ce"},
-    {name: "Caribou_Prefs", label: "\u2328"},
-    {name: "Caribou_ShiftUp", label: "\u2b06"},
-    {name: "Caribou_ShiftDown", label: "\u2b07"},
-    {name: "Caribou_Emoticons", label: "\u263a"},
-    {name: "Caribou_Symbols", label: "123"},
-    {name: "Caribou_Symbols_More", label: "{#*"},
-    {name: "Caribou_Alpha", label: "Abc"}
+    { name: "BackSpace", label: "\u232b" },
+    { name: "space", label: " " },
+    { name: "Return", label: "\u23ce" },
+    { name: "Caribou_Prefs", label: "\u2328" },
+    { name: "Caribou_ShiftUp", label: "\u2b06" },
+    { name: "Caribou_ShiftDown", label: "\u2b07" },
+    { name: "Caribou_Emoticons", label: "\u263a" },
+    { name: "Caribou_Symbols", label: "123" },
+    { name: "Caribou_Symbols_More", label: "{#*" },
+    { name: "Caribou_Alpha", label: "Abc" }
 ]
 
 function Key(key) {
@@ -28,20 +28,20 @@ function Key(key) {
 
 Key.prototype = {
     _init : function(key) {
-       this.key = key;
-       if (this.key.name == "Caribou_Prefs")
-           this.key.connect('key-clicked', Lang.bind(this,this._onPrefsClick));
-       this.extended_keys = new St.BoxLayout({ name: 'keyboard-row'});
+       this._key = key;
+       if (this._key.name == "Caribou_Prefs")
+           this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
+       this.extended_keys = new St.BoxLayout({ name: 'keyboard-row' });
     },
 
     getKey: function () {
-        let label = this.key.name;
+        let label = this._key.name;
 
-        if (this.key.name.length > 1) {
+        if (this._key.name.length > 1) {
             let foundPretty = false;
 
             for (var i = 0; i < Pretty_Keys.length; ++i) {
-                if (this.key.name == Pretty_Keys[i].name) {
+                if (this._key.name == Pretty_Keys[i].name) {
                     label = Pretty_Keys[i].label;
                     foundPretty = true;
                     break;
@@ -49,17 +49,17 @@ Key.prototype = {
             }
 
             if (!foundPretty) {
-                let keyval = this.key.keyval;
-                let unichar = Gdk.keyval_to_unicode(this.key.keyval);
+                let keyval = this._key.keyval;
+                let unichar = Gdk.keyval_to_unicode(keyval);
                 if (unichar)
                     label = String.fromCharCode(unichar);
             }
         }
 
-        let button = new St.Button ({ label: label, style_class: 'keyboard-key'});
+        let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
 
-        button.connect('button-press-event', Lang.bind(this, function () { this.key.press(); }));
-        button.connect('button-release-event', Lang.bind(this, function () { this.key.release(); }));
+        button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
+        button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
 
         return button;
      },
@@ -89,9 +89,9 @@ Keyboard.prototype = {
         this.groups = {};
         this.current_page = null;
 
-        this.addKeys();
+        this._addKeys();
 
-        this.keyboard.connect("notify::active-group", Lang.bind(this,this._onGroupChanged));
+        this.keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._reposition));
 
@@ -108,16 +108,16 @@ Keyboard.prototype = {
         this.actor.y = primary.y + primary.height - this.actor.height;
     },
 
-    addKeys: function () {
+    _addKeys: function () {
         for each (gname in this.keyboard.get_groups()) {
              let group = this.keyboard.get_group(gname);
-             group.connect("notify::active-level", Lang.bind(this,this._onLevelChanged));
+             group.connect('notify::active-level', Lang.bind(this, this._onLevelChanged));
              let layers = {};
              for each (lname in group.get_levels()) {
                  let level = group.get_level(lname);
                  let layout = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
                  this._loadRows(level,layout);
-                 layers[lname]= layout;
+                 layers[lname] = layout;
                  this.actor.add(layout);
                  layout.hide()
              }
@@ -126,8 +126,8 @@ Keyboard.prototype = {
         this._setActiveLayer();
     },
 
-    addRows : function (keys,layout) {
-        let box = new St.BoxLayout ({ name: 'keyboard-row'});
+    _addRows : function (keys, layout) {
+        let box = new St.BoxLayout ({ name: 'keyboard-row' });
         for each (key in keys) {
             let button = new Key(key);
             box.add(button.getKey());
@@ -135,10 +135,10 @@ Keyboard.prototype = {
         layout.add(box);
     },
 
-    _loadRows : function (level,layout) {
+    _loadRows : function (level, layout) {
         let rows = level.get_rows();
         for each (row in rows) {
-           this.addRows(row.get_keys(),layout);
+           this._addRows(row.get_keys(), layout);
         }
     },
 
