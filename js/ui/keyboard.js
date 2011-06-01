@@ -61,14 +61,6 @@ Key.prototype = {
         button.connect('button-press-event', Lang.bind(this, function () { this.key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this.key.release(); }));
 
-    /*    if (this.key.get_extended_keys() != null) {
-            this.key.connect("notify::show-subkeys", Lang.bind(this,this._onShowSubkeys));
-            for each (key in key.get_extended_keys()) {
-                let extended_key = new St.Button ({ label: key.name, style_class: 'keyboard-key'});
-                this.extended_keys.add(extended_key);
-            }
-            this.extended_keys.hide();
-        }*/
         return button;
      },
 
