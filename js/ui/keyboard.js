@@ -28,10 +28,10 @@ function Key(key) {
 
 Key.prototype = {
     _init : function(key) {
-       this._key = key;
-       if (this._key.name == "Caribou_Prefs")
-           this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
-       this.extended_keys = new St.BoxLayout({ name: 'keyboard-row' });
+        this._key = key;
+        if (this._key.name == "Caribou_Prefs")
+            this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
+        this.extended_keys = new St.BoxLayout({ name: 'keyboard-row' });
     },
 
     getKey: function () {
@@ -62,18 +62,18 @@ Key.prototype = {
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
 
         return button;
-     },
+    },
 
-     _onPrefsClick: function () {
-     },
+    _onPrefsClick: function () {
+    },
 
-     _onShowSubkeys: function () {
-          if (this.key.show_sub_keys) {
-              this.extended_keys.show();
-          } else {
-              this.extended_keys.hide();
-          }
-     }
+    _onShowSubkeys: function () {
+        if (this._key.show_sub_keys) {
+            this.extended_keys.show();
+        } else {
+            this.extended_keys.hide();
+        }
+    }
 };
 
 function Keyboard() {
@@ -138,8 +138,9 @@ Keyboard.prototype = {
     _loadRows : function (level, layout) {
         let rows = level.get_rows();
         for each (row in rows) {
-           this._addRows(row.get_keys(), layout);
+            this._addRows(row.get_keys(),layout);
         }
+
     },
 
     _onLevelChanged: function () {
