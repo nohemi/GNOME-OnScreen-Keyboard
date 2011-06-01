@@ -9,16 +9,16 @@ const Caribou = imports.gi.Caribou;
 const Main = imports.ui.main;
 
 const Pretty_Keys = [
-    {name: "BackSpace", button: new St.Button({ label: "\u232b", style_class: 'keyboard-key'})},
-    {name: "space", button: new St.Button({ label: " ", style_class: 'keyboard-key'})},
-    {name: "Return", button: new St.Button({ label: "\u23ce", style_class: 'keyboard-key'})},
-    {name: "Caribou_Prefs", button: new St.Button({ label: "\u2328", style_class: 'keyboard-key'})},
-    {name: "Caribou_ShiftUp", button: new St.Button({ label: "\u2b06", style_class: 'keyboard-key'})},
-    {name: "Caribou_ShiftDown", button: new St.Button({ label: "\u2b07", style_class: 'keyboard-key'})},
-    {name: "Caribou_Emoticons", button: new St.Button({ label: "\u263a", style_class: 'keyboard-key'})},
-    {name: "Caribou_Symbols", button: new St.Button({ label: "123", style_class: 'keyboard-key'})},
-    {name: "Caribou_Symbols_More", button: new St.Button({ label: "{#*", style_class: 'keyboard-key'})},
-    {name: "Caribou_Alpha", button: new St.Button({ label: "Abc", style_class: 'keyboard-key'})}
+    {name: "BackSpace", label: "\u232b"},
+    {name: "space", label: " "},
+    {name: "Return", label: "\u23ce"},
+    {name: "Caribou_Prefs", label: "\u2328"},
+    {name: "Caribou_ShiftUp", label: "\u2b06"},
+    {name: "Caribou_ShiftDown", label: "\u2b07"},
+    {name: "Caribou_Emoticons", label: "\u263a"},
+    {name: "Caribou_Symbols", label: "123"},
+    {name: "Caribou_Symbols_More", label: "{#*"},
+    {name: "Caribou_Alpha", label: "Abc"}
 ]
 
 function Key(key) {
@@ -34,16 +34,18 @@ Key.prototype = {
     },
 
     getKey: function () {
+        let label = this.key.name;
+
         if (this.key.name.length > 1) {
             for (var i = 0; i < Pretty_Keys.length; ++i) {
                 if (this.key.name == Pretty_Keys[i].name)
-                    return Pretty_Keys[i].button;
+                    label = Pretty_Keys[i].label;
                 if (this.key.name == "Caribou_Prefs")
                     this.key.connect('key-clicked', Lang.bind(this,this._onPrefsClick));
             }
         }
         let charAt = new String (this.key.name);
-        let button = new St.Button ({ label: this.key.name, style_class: 'keyboard-key'});
+        let button = new St.Button ({ label: label, style_class: 'keyboard-key'});
         button.connect('clicked', function () { global.fake_key_press(charAt.charAt(0)); });
     /*    if (this.key.get_extended_keys() != null) {
             this.key.connect("notify::show-subkeys", Lang.bind(this,this._onShowSubkeys));
