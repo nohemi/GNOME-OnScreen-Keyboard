@@ -28,51 +28,50 @@ function Key(key) {
 Key.prototype = {
     _init : function(key) {
        this.key = key;
+       this.key.connect('key-pressed', Lang.bind(this,this._onClick));
+       this.key.connect('key-released', Lang.bind(this,this._onRelease));
+       this.extended_keys = new St.BoxLayout({ name: 'keyboard-row'});
     },
 
-    getSym : function() {
+    getKey: function () {
         if (this.key.name.length > 1) {
             for (var i = 0; i < Pretty_Keys.length; ++i) {
                 if (this.key.name == Pretty_Keys[i].name)
                     return Pretty_Keys[i].button;
+                if (this.key.name == "Caribou_Prefs")
+                    this.key.connect('key-clicked', Lang.bind(this,this._onPrefsClick));
             }
         }
-        //let label = new String (this.key.name);
-        //let button = new St.Button({ label: label, style_class: 'keyboard-key'});
-        //button.connect('clicked', function () { global.fake_key_press(label.charAt(0)); });
         let button = new St.Button ({ label: this.key.name, style_class: 'keyboard-key'});
+        if (this.key.get_extended_keys() != null) {
+            this.key.connect("notify::show-subkeys", Lang.bind(this,this._onShowSubkeys));
+            for each (key in key.get_extended_keys()) {
+                let extended_key = new St.Button ({ label: key.name, style_class: 'keyboard-key'});
+                this.extended_keys.add(extended_key);
+            }
+            this.extended_keys.hide();
+        }
         return button;
+     },
+
+     _onPrefsClick: function () {
+     },
+
+     _onShowSubkeys: function () {
+          if (this.key.show_sub_keys) {
+              this.extended_keys.show();
+          } else {
+              this.extended_keys.hide();
+          }
+     },
+
+     _onClick: function () {
+         this.key.press();
+     },
+
+     _onRelease: function () {
+         this.key.release();
      }
-};
-
-function Layout(level) {
-   this._init(level);
-}
-
-Layout.prototype = {
-    _init : function (level) {
-        this.layout = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });;
-        this.level = level;
-        this.loadRows();
-    },
-
-    addRows : function (keys, row_num) {
-        let box = new St.BoxLayout ({ name: 'keyboard-row'});
-        for each (key in keys) {
-            let button = new Key(key);
-            box.add(button.getSym());
-        }
-        this.layout.add(box);
-    },
-
-    loadRows : function () {
-        let rows = this.level.get_rows();
-        let row_num = 0;
-        for each (row in rows) {
-           this.addRows(row.get_keys(), row_num);
-           row_num ++;
-        }
-    }
 };
 
 function Keyboard() {
@@ -82,15 +81,13 @@ function Keyboard() {
 Keyboard.prototype = {
     _init: function () {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
-        this.actor1 = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
-        this.actor2 = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
-        this.actor3 = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
 
         this.keyboard = new Caribou.KeyboardModel();
 
-        this.layers = {};
+        this.groups = {};
         this.addKeys();
 
+        this.keyboard.connect("notify::active-group", Lang.bind(this,this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._reposition));
 
@@ -98,6 +95,7 @@ Keyboard.prototype = {
                                            visibleInFullscreen: true,
                                            affectsStruts: false });
 
+        this.current_page = {};
         this._reposition();
     },
 
@@ -110,33 +108,26 @@ Keyboard.prototype = {
     addKeys: function () {
         for each (gname in this.keyboard.get_groups()) {
              let group = this.keyboard.get_group(gname);
-             group.connect("notify::active-level", this._onLevelChanged)
-             /*for each (lname in group.get_levels()) {
+             group.connect("notify::active-level", Lang.bind(this,this._onLevelChanged));
+             let layers = {};
+             for each (lname in group.get_levels()) {
                  let level = group.get_level(lname);
-                 let layout = new Layout(level);
-                 this.layers[lname]= layout;
-                 this.actor.add(layout.layout);
-                 layout.layout.show()
-             }*/
-             let levels = group.get_levels();
-             let level1 = group.get_level(levels[1]);
-             let layout = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
-             this._loadRows(level1,layout);
-             this.actor.add(layout);
-             layout.hide();
-            /* let level2 = group.get_level(levels[0]);
-             let layout1 = new Layout(level2);
-             this.actor1.add(layout1.layout);
-             this.actor1.show();*/
+                 let layout = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
+                 this._loadRows(level,layout);
+                 layers[lname]= layout;
+                 this.actor.add(layout);
+                 layout.hide()
+             }
+             this.groups[gname] = layers;
         }
         this._setActiveLayer();
     },
 
-       addRows : function (keys,layout) {
+    addRows : function (keys,layout) {
         let box = new St.BoxLayout ({ name: 'keyboard-row'});
         for each (key in keys) {
             let button = new Key(key);
-            box.add(button.getSym());
+            box.add(button.getKey());
         }
         layout.add(box);
     },
@@ -152,13 +143,22 @@ Keyboard.prototype = {
         this._setActiveLayer();
     },
 
+    _onGroupChanged: function () {
+        this._setActiveLayer();
+    },
+
     _setActiveLayer: function () {
         let active_group_name = this.keyboard.active_group;
         let active_group = this.keyboard.get_group(active_group_name);
         let active_level = active_group.active_level;
-      //  let layer = this.layers[active_level];
-      //  this.actor.add(layer.layout);
-      //  layer.layout.show();
+        let layers = this.groups[active_group_name];
+
+        if (this.current_page != null) {
+            this.current_page.hide()
+        }
+
+        this.current_page = layers[active_level];
+        layers[active_level].show();
     },
 
     show: function () {
