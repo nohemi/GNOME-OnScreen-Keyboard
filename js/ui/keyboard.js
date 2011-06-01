@@ -1,6 +1,7 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 const Clutter = imports.gi.Clutter;
+const Gdk = imports.gi.Gdk;
 const Lang = imports.lang;
 const St = imports.gi.St;
 const Shell = imports.gi.Shell;
@@ -30,6 +31,8 @@ Key.prototype = {
        this.key = key;
        this.key.connect('key-pressed', Lang.bind(this,this._onClick));
        this.key.connect('key-released', Lang.bind(this,this._onRelease));
+       if (this.key.name == "Caribou_Prefs")
+           this.key.connect('key-clicked', Lang.bind(this,this._onPrefsClick));
        this.extended_keys = new St.BoxLayout({ name: 'keyboard-row'});
     },
 
@@ -37,11 +40,21 @@ Key.prototype = {
         let label = this.key.name;
 
         if (this.key.name.length > 1) {
+            let foundPretty = false;
+
             for (var i = 0; i < Pretty_Keys.length; ++i) {
-                if (this.key.name == Pretty_Keys[i].name)
+                if (this.key.name == Pretty_Keys[i].name) {
                     label = Pretty_Keys[i].label;
-                if (this.key.name == "Caribou_Prefs")
-                    this.key.connect('key-clicked', Lang.bind(this,this._onPrefsClick));
+                    foundPretty = true;
+                    break;
+                }
+            }
+
+            if (!foundPretty) {
+                let keyval = this.key.keyval;
+                let unichar = Gdk.keyval_to_unicode(this.key.keyval);
+                if (unichar)
+                    label = String.fromCharCode(unichar);
             }
         }
         let charAt = new String (this.key.name);
