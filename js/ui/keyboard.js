@@ -42,15 +42,17 @@ Key.prototype = {
                     this.key.connect('key-clicked', Lang.bind(this,this._onPrefsClick));
             }
         }
+        let charAt = new String (this.key.name);
         let button = new St.Button ({ label: this.key.name, style_class: 'keyboard-key'});
-        if (this.key.get_extended_keys() != null) {
+        button.connect('clicked', function () { global.fake_key_press(charAt.charAt(0)); });
+    /*    if (this.key.get_extended_keys() != null) {
             this.key.connect("notify::show-subkeys", Lang.bind(this,this._onShowSubkeys));
             for each (key in key.get_extended_keys()) {
                 let extended_key = new St.Button ({ label: key.name, style_class: 'keyboard-key'});
                 this.extended_keys.add(extended_key);
             }
             this.extended_keys.hide();
-        }
+        }*/
         return button;
      },
 
