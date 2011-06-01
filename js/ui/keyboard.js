@@ -29,8 +29,6 @@ function Key(key) {
 Key.prototype = {
     _init : function(key) {
        this.key = key;
-       this.key.connect('key-pressed', Lang.bind(this,this._onClick));
-       this.key.connect('key-released', Lang.bind(this,this._onRelease));
        if (this.key.name == "Caribou_Prefs")
            this.key.connect('key-clicked', Lang.bind(this,this._onPrefsClick));
        this.extended_keys = new St.BoxLayout({ name: 'keyboard-row'});
@@ -57,9 +55,12 @@ Key.prototype = {
                     label = String.fromCharCode(unichar);
             }
         }
-        let charAt = new String (this.key.name);
+
         let button = new St.Button ({ label: label, style_class: 'keyboard-key'});
-        button.connect('clicked', function () { global.fake_key_press(charAt.charAt(0)); });
+
+        button.connect('button-press-event', Lang.bind(this, function () { this.key.press(); }));
+        button.connect('button-release-event', Lang.bind(this, function () { this.key.release(); }));
+
     /*    if (this.key.get_extended_keys() != null) {
             this.key.connect("notify::show-subkeys", Lang.bind(this,this._onShowSubkeys));
             for each (key in key.get_extended_keys()) {
@@ -80,14 +81,6 @@ Key.prototype = {
           } else {
               this.extended_keys.hide();
           }
-     },
-
-     _onClick: function () {
-         this.key.press();
-     },
-
-     _onRelease: function () {
-         this.key.release();
      }
 };
 
