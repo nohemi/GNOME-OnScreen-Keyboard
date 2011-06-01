@@ -97,7 +97,7 @@ Keyboard.prototype = {
                                            visibleInFullscreen: true,
                                            affectsStruts: false });
 
-        this.current_page = {};
+        this.current_page = null;
         this._reposition();
     },
 
