@@ -2,6 +2,7 @@
 
 const Clutter = imports.gi.Clutter;
 const Gdk = imports.gi.Gdk;
+const GLib = imports.gi.GLib;
 const Lang = imports.lang;
 const St = imports.gi.St;
 const Shell = imports.gi.Shell;
@@ -69,6 +70,7 @@ Key.prototype = {
             }
         }
 
+        label = GLib.markup_escape_text(label, -1);
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
 
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
