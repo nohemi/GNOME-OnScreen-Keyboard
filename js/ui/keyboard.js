@@ -32,7 +32,7 @@ function Key(key) {
 Key.prototype = {
     _init : function(key) {
         this._key = key;
-        this.button = this._getKey();
+        this.actor = this._getKey();
 
         this._extended_keys = this._key.get_extended_keys();
         if (this._key.name == "Caribou_Prefs")
@@ -40,7 +40,7 @@ Key.prototype = {
 
         if (this._extended_keys.length > 0) {
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
-            this._menu = new PopupMenu.PopupMenu(this.button);
+            this._menu = new PopupMenu.PopupMenu(this.actor);
             this._menuManager = new PopupMenu.PopupMenuManager(this._menu);
             this._getExtendedKeys();
             Main.chrome.addActor(this._menu.actor, { visibleInOverview: true,
@@ -102,7 +102,7 @@ Key.prototype = {
 
     _onShowSubkeys: function () {
         if (this._key.show_subkeys) {
-            this.button.fake_release();
+            this.actor.fake_release();
             this._menu.open();
         } else {
             this._menu.close();
@@ -168,7 +168,7 @@ Keyboard.prototype = {
         let box = new St.BoxLayout ({ name: 'keyboard-row' });
         for each (key in keys) {
             let button = new Key(key);
-            box.add(button.button);
+            box.add(button.actor);
         }
         layout.add(box);
     },
