@@ -40,12 +40,14 @@ Key.prototype = {
 
         if (this._extended_keys.length > 0) {
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
-            this._menu = new PopupMenu.PopupMenu(this.actor);
-            this._menuManager = new PopupMenu.PopupMenuManager(this._menu);
+            this._menu = new PopupMenu.PopupMenu(this.actor, St.Align.MIDDLE, St.Side.BOTTOM, 0);
+            this._menuManager = new PopupMenu.PopupMenuManager(this);
             this._getExtendedKeys();
+            this._menu.actor.hide();
+            this._menu.blockSourceEvents = true;
             Main.chrome.addActor(this._menu.actor, { visibleInOverview: true,
-                                           visibleInFullscreen: true,
-                                           affectsStruts: false });
+                                                     visibleInFullscreen: true,
+                                                     affectsStruts: false });
         }
     },
 
@@ -103,6 +105,7 @@ Key.prototype = {
     _onShowSubkeys: function () {
         if (this._key.show_subkeys) {
             this.actor.fake_release();
+            this._menu.actor.raise_top();
             this._menu.open();
         } else {
             this._menu.close();
