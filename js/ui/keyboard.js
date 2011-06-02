@@ -2,7 +2,9 @@
 
 const Clutter = imports.gi.Clutter;
 const Gdk = imports.gi.Gdk;
+const GLib = imports.gi.GLib;
 const Lang = imports.lang;
+const Mainloop = imports.mainloop;
 const St = imports.gi.St;
 const Shell = imports.gi.Shell;
 const Caribou = imports.gi.Caribou;
@@ -66,6 +68,7 @@ Key.prototype = {
             }
         }
 
+        label = GLib.markup_escape_text(label, -1);
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
 
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
@@ -124,7 +127,7 @@ Keyboard.prototype = {
 
         this.keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
-        this.actor.connect('allocation-changed', Lang.bind(this, this._reposition));
+        this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
 
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                            visibleInFullscreen: true,
@@ -137,6 +140,10 @@ Keyboard.prototype = {
         let primary = global.get_primary_monitor();
         this.actor.x = primary.x;
         this.actor.y = primary.y + primary.height - this.actor.height;
+    },
+
+    _queueReposition: function () {
+        Mainloop.timeout_add(0, Lang.bind(this, function () { this._reposition(); }));
     },
 
     _addKeys: function () {
