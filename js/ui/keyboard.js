@@ -31,12 +31,16 @@ Key.prototype = {
     _init : function(key) {
         this._key = key;
         this.button = this._getKey();
+
+        //this._extended_keys = this._key.get_extended_keys();
+        this._extended_keys = ['a','e','i','o','u'];
         if (this._key.name == "Caribou_Prefs")
             this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
 
-        if (this._key.get_extended_keys().length > 0) {
+        if (this._extended_keys.length > 0) {
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
-            this._popupMenu = new PopupMenu();
+            this._menu = new PopupMenu.PopupMenu();
+            this._menuManager = new PopupMenu.PopupMenuManager(this._menu);
             this._getExtendedKeys();
         }
     },
@@ -72,25 +76,21 @@ Key.prototype = {
     },
 
     _onPrefsClick: function () {
-    }
+    },
 
     _getExtendedKeys: function () {
-        let popupManager = new PopupMenuManager();
-        let extended_keys = this._key.get_extended_keys();
-        for (let i = 0; i < extended_keys.length; ++i) {
-            let extended_key = extended_keys.pop();
-            let key = new St.Button({ label: extended_key.name, style_class: 'keyboard-key' });
-            this._popupMenu.addMenuItem(key,0);
+        for each (key in this._extended_keys) {
+            let extended_key = new PopupMenu.PopupMenuItem(key);
+            this._menu.addMenuItem(extended_key);
         }
-        popupManager.addMenu(this._popupMenu);
     },
 
     _onShowSubkeys: function () {
         if (this._key.show_sub_keys) {
             this.button.fake_release();
-            this._popupMenu.open();
+            this._menu.open();
         } else {
-            this._popupMenu.close();
+            this._menu.close();
         }
     }
 };
