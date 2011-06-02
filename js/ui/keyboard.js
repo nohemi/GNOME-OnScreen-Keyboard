@@ -32,16 +32,18 @@ Key.prototype = {
         this._key = key;
         this.button = this._getKey();
 
-        //this._extended_keys = this._key.get_extended_keys();
-        this._extended_keys = ['a','e','i','o','u'];
+        this._extended_keys = this._key.get_extended_keys();
         if (this._key.name == "Caribou_Prefs")
             this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
 
         if (this._extended_keys.length > 0) {
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
-            this._menu = new PopupMenu.PopupMenu();
+            this._menu = new PopupMenu.PopupMenu(this.button);
             this._menuManager = new PopupMenu.PopupMenuManager(this._menu);
             this._getExtendedKeys();
+            Main.chrome.addActor(this._menu.actor, { visibleInOverview: true,
+                                           visibleInFullscreen: true,
+                                           affectsStruts: false });
         }
     },
 
@@ -80,13 +82,20 @@ Key.prototype = {
 
     _getExtendedKeys: function () {
         for each (key in this._extended_keys) {
-            let extended_key = new PopupMenu.PopupMenuItem(key);
+            let label = key.name;
+            let keyval = key.keyval;
+            let unichar = Gdk.keyval_to_unicode(keyval);
+            if (unichar)
+                label = String.fromCharCode(unichar);
+            let extended_key = new PopupMenu.PopupMenuItem(label);
+            extended_key.connect('activate', Lang.bind(this, function () { key.press(); }));
             this._menu.addMenuItem(extended_key);
         }
+        this._menuManager.addMenu(this._menu);
     },
 
     _onShowSubkeys: function () {
-        if (this._key.show_sub_keys) {
+        if (this._key.show_subkeys) {
             this.button.fake_release();
             this._menu.open();
         } else {
