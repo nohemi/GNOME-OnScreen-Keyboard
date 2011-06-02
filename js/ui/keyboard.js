@@ -7,6 +7,7 @@ const St = imports.gi.St;
 const Shell = imports.gi.Shell;
 const Caribou = imports.gi.Caribou;
 
+const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 
 const Pretty_Keys = [
@@ -29,12 +30,18 @@ function Key(key) {
 Key.prototype = {
     _init : function(key) {
         this._key = key;
+        this.button = this._getKey();
         if (this._key.name == "Caribou_Prefs")
             this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
-        this.extended_keys = new St.BoxLayout({ name: 'keyboard-row' });
+
+        if (this._key.get_extended_keys().length > 0) {
+            this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
+            this._popupMenu = new PopupMenu();
+            this._getExtendedKeys();
+        }
     },
 
-    getKey: function () {
+    _getKey: function () {
         let label = this._key.name;
 
         if (this._key.name.length > 1) {
@@ -65,13 +72,25 @@ Key.prototype = {
     },
 
     _onPrefsClick: function () {
+    }
+
+    _getExtendedKeys: function () {
+        let popupManager = new PopupMenuManager();
+        let extended_keys = this._key.get_extended_keys();
+        for (let i = 0; i < extended_keys.length; ++i) {
+            let extended_key = extended_keys.pop();
+            let key = new St.Button({ label: extended_key.name, style_class: 'keyboard-key' });
+            this._popupMenu.addMenuItem(key,0);
+        }
+        popupManager.addMenu(this._popupMenu);
     },
 
     _onShowSubkeys: function () {
         if (this._key.show_sub_keys) {
-            this.extended_keys.show();
+            this.button.fake_release();
+            this._popupMenu.open();
         } else {
-            this.extended_keys.hide();
+            this._popupMenu.close();
         }
     }
 };
@@ -130,7 +149,7 @@ Keyboard.prototype = {
         let box = new St.BoxLayout ({ name: 'keyboard-row' });
         for each (key in keys) {
             let button = new Key(key);
-            box.add(button.getKey());
+            box.add(button.button);
         }
         layout.add(box);
     },
