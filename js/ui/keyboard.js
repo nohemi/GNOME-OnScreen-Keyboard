@@ -64,10 +64,7 @@ Key.prototype = {
             }
 
             if (!foundPretty) {
-                let keyval = this._key.keyval;
-                let unichar = Gdk.keyval_to_unicode(keyval);
-                if (unichar)
-                    label = String.fromCharCode(unichar);
+                label = this._getUnichar(this._key);
             }
         }
 
@@ -80,16 +77,22 @@ Key.prototype = {
         return button;
     },
 
+    _getUnichar: function(key) {
+        let keyval = key.keyval;
+        let unichar = Gdk.keyval_to_unicode(keyval);
+        if (unichar) {
+            return String.fromCharCode(unichar);
+        } else {
+            return key.name;
+        }
+    },
+
     _onPrefsClick: function () {
     },
 
     _getExtendedKeys: function () {
         for each (key in this._extended_keys) {
-            let label = key.name;
-            let keyval = key.keyval;
-            let unichar = Gdk.keyval_to_unicode(keyval);
-            if (unichar)
-                label = String.fromCharCode(unichar);
+            let label = this._getUnichar(key);
             let extended_key = new PopupMenu.PopupMenuItem(label);
             extended_key.connect('activate', Lang.bind(this, function () { key.press(); }));
             this._menu.addMenuItem(extended_key);
