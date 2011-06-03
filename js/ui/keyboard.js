@@ -97,7 +97,8 @@ Key.prototype = {
 
     _getExtendedKeys: function () {
         let box = new St.BoxLayout({ name: 'keyboard-row', vertical: false });
-        for each (extended_key in this._extended_keys) {
+        for (let i = 0; i < this._extended_keys.length; i++) {
+            let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
