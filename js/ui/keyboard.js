@@ -42,10 +42,10 @@ Key.prototype = {
         if (this._extended_keys.length > 0) {
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
             this._menu = new BoxPointer.BoxPointer(St.Side.BOTTOM,
-                                                         { x_fill: true,
-                                                           y_fill: true,
-                                                           x_align: St.Align.START });
-            this._menu.actor.add_style_class_name('popup-menu');
+                                                   { x_fill: true,
+                                                     y_fill: true,
+                                                     x_align: St.Align.START });
+            this._menu.actor.add_style_class_name('keyboard-subkeys');
             this._getExtendedKeys();
             this._menu.actor.hide();
             Main.chrome.addActor(this._menu.actor, { visibleInOverview: true,
@@ -96,7 +96,8 @@ Key.prototype = {
     },
 
     _getExtendedKeys: function () {
-        let box = new St.BoxLayout({ name: 'keyboard-row', vertical: false });
+        let box = new St.BoxLayout({ style_class: 'keyboard-layout',
+                                     vertical: false });
         for (let i = 0; i < this._extended_keys.length; i++) {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
@@ -105,14 +106,14 @@ Key.prototype = {
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             box.add(key);
         }
-        this._menu.actor.add_actor(box);
+        this._menu.bin.add_actor(box);
     },
 
     _onShowSubkeys: function () {
         if (this._key.show_subkeys) {
             this.actor.fake_release();
             this._menu.actor.raise_top();
-            this._menu.setPosition(this.actor, 0, St.Align.MIDDLE);
+            this._menu.setPosition(this.actor, 5, St.Align.MIDDLE);
             this._menu.show(true);
             this.actor.set_hover(false);
         } else {
@@ -164,7 +165,8 @@ Keyboard.prototype = {
              let layers = {};
              for each (lname in group.get_levels()) {
                  let level = group.get_level(lname);
-                 let layout = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
+                 let layout = new St.BoxLayout({ style_class: 'keyboard-layout',
+                                                 vertical: 'false' });
                  this._loadRows(level,layout);
                  layers[lname] = layout;
                  this.actor.add(layout);
@@ -176,7 +178,7 @@ Keyboard.prototype = {
     },
 
     _addRows : function (keys, layout) {
-        let box = new St.BoxLayout ({ name: 'keyboard-row' });
+        let box = new St.BoxLayout ({ style_class: 'keyboard-row' });
         for each (key in keys) {
             let button = new Key(key);
             box.add(button.actor);

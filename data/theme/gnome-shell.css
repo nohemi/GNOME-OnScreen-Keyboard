@@ -1661,14 +1661,15 @@ StTooltip StLabel {
 #keyboard {
     border: 1px solid white;
     background: black;
+}
+
+.keyboard-layout {
     spacing: 5px;
     padding: 5px;
 }
 
 .keyboard-row {
-    background: black;
     spacing: 5px;
-    padding: 5px;
 }
 
 .keyboard-key {
@@ -1685,4 +1686,15 @@ StTooltip StLabel {
 
 .keyboard-key:active {
     background: #808080
+}
+
+.keyboard-subkeys {
+    color: white;
+    padding: 5px;
+    -arrow-border-radius: 5px;
+    -arrow-background-color: black;
+    -arrow-border-width: 1px;
+    -arrow-border-color: white;
+    -arrow-base: 10px;
+    -arrow-rise: 5px;
 }
