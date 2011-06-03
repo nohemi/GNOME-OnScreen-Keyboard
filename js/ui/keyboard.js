@@ -107,6 +107,7 @@ Key.prototype = {
             this.actor.fake_release();
             this._menu.actor.raise_top();
             this._menu.open();
+            this.actor.set_hover(false);
         } else {
             this._menu.close();
         }
