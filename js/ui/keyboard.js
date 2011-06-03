@@ -113,7 +113,7 @@ Key.prototype = {
         if (this._key.show_subkeys) {
             this.actor.fake_release();
             this._menu.actor.raise_top();
-            this._menu.setPosition(this.actor, 5, St.Align.MIDDLE);
+            this._menu.setPosition(this.actor, 5, 0.5);
             this._menu.show(true);
             this.actor.set_hover(false);
         } else {
