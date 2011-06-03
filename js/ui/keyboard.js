@@ -9,6 +9,7 @@ const St = imports.gi.St;
 const Shell = imports.gi.Shell;
 const Caribou = imports.gi.Caribou;
 
+const BoxPointer = imports.ui.boxpointer;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 
@@ -40,11 +41,13 @@ Key.prototype = {
 
         if (this._extended_keys.length > 0) {
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
-            this._menu = new PopupMenu.PopupMenu(this.actor, St.Align.MIDDLE, St.Side.BOTTOM, 0);
-            this._menuManager = new PopupMenu.PopupMenuManager(this);
+            this._menu = new BoxPointer.BoxPointer(St.Side.BOTTOM,
+                                                         { x_fill: true,
+                                                           y_fill: true,
+                                                           x_align: St.Align.START });
+            this._menu.actor.add_style_class_name('popup-menu');
             this._getExtendedKeys();
             this._menu.actor.hide();
-            this._menu.blockSourceEvents = true;
             Main.chrome.addActor(this._menu.actor, { visibleInOverview: true,
                                                      visibleInFullscreen: true,
                                                      affectsStruts: false });
@@ -93,23 +96,26 @@ Key.prototype = {
     },
 
     _getExtendedKeys: function () {
-        for each (key in this._extended_keys) {
-            let label = this._getUnichar(key);
-            let extended_key = new PopupMenu.PopupMenuItem(label);
-            extended_key.connect('activate', Lang.bind(this, function () { key.press(); }));
-            this._menu.addMenuItem(extended_key);
+        let box = new St.BoxLayout({ name: 'keyboard-row', vertical: false })
+        for each (extended_key in this._extended_keys) {
+            let label = this._getUnichar(extended_key);
+            let key = new St.Button({ label: label, style_class: 'keyboard-key' });
+            key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
+            key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
+            box.add(key);
         }
-        this._menuManager.addMenu(this._menu);
+        this._menu.actor.add_actor(box);
     },
 
     _onShowSubkeys: function () {
         if (this._key.show_subkeys) {
             this.actor.fake_release();
             this._menu.actor.raise_top();
-            this._menu.open();
+            this._menu.setPosition(this.actor, 0, St.Align.MIDDLE);
+            this._menu.show(true);
             this.actor.set_hover(false);
         } else {
-            this._menu.close();
+            this._menu.actor.hide();
         }
     }
 };
