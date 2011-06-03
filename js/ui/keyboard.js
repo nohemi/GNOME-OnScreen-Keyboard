@@ -24,7 +24,7 @@ const Pretty_Keys = [
     { name: "Caribou_Symbols", label: "123" },
     { name: "Caribou_Symbols_More", label: "{#*" },
     { name: "Caribou_Alpha", label: "Abc" }
-]
+];
 
 function Key(key) {
     this._init(key);
@@ -96,7 +96,7 @@ Key.prototype = {
     },
 
     _getExtendedKeys: function () {
-        let box = new St.BoxLayout({ name: 'keyboard-row', vertical: false })
+        let box = new St.BoxLayout({ name: 'keyboard-row', vertical: false });
         for each (extended_key in this._extended_keys) {
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
@@ -167,7 +167,7 @@ Keyboard.prototype = {
                  this._loadRows(level,layout);
                  layers[lname] = layout;
                  this.actor.add(layout);
-                 layout.hide()
+                 layout.hide();
              }
              this.groups[gname] = layers;
         }
@@ -206,7 +206,7 @@ Keyboard.prototype = {
         let layers = this.groups[active_group_name];
 
         if (this.current_page != null) {
-            this.current_page.hide()
+            this.current_page.hide();
         }
 
         this.current_page = layers[active_level];
