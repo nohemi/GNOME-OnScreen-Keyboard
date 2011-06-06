@@ -36,6 +36,7 @@ Key.prototype = {
         this.actor = this._getKey();
 
         this._extended_keys = this._key.get_extended_keys();
+        this._extended_keyboard = {};
         if (this._key.name == "Caribou_Prefs")
             this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
 
@@ -100,25 +101,25 @@ Key.prototype = {
     },
 
     _getExtendedKeys: function () {
-        let box = new St.BoxLayout({ style_class: 'keyboard-layout',
+        this._extended_keyboard = new St.BoxLayout({ style_class: 'keyboard-layout',
                                      vertical: false });
         for (let i = 0; i < this._extended_keys.length; i++) {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
-            key.connect('button-press-event', Lang.bind(this,
-                function () {
-                    this._ungrab();
-                    extended_key.press();
-                }));
+            key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
-            box.add(key);
+            this._extended_keyboard.add(key);
         }
-        this._menu.bin.add_actor(box);
+        this._menu.bin.add_actor(this._extended_keyboard);
     },
 
     _onEventCapture: function (actor, event) {
         if (event.type() == Clutter.EventType.BUTTON_PRESS && this._showExtendedKeys) {
+            if(this._extended_keyboard.contains(event.get_source())) {
+                this._ungrab();
+                return false;
+            }
             this._menu.actor.hide();
             this._ungrab();
             return true;
