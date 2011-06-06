@@ -39,7 +39,11 @@ Key.prototype = {
         if (this._key.name == "Caribou_Prefs")
             this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
 
+        this._showExtendedKeys = false;
+
         if (this._extended_keys.length > 0) {
+            this._grabbed = false;
+            this._eventCaptureId = 0;
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
             this._menu = new BoxPointer.BoxPointer(St.Side.BOTTOM,
                                                    { x_fill: true,
@@ -102,22 +106,49 @@ Key.prototype = {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
-            key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
+            key.connect('button-press-event', Lang.bind(this,
+                function () {
+                    this._ungrab();
+                    extended_key.press();
+                }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             box.add(key);
         }
         this._menu.bin.add_actor(box);
     },
 
+    _onEventCapture: function (actor, event) {
+        if (event.type() == Clutter.EventType.BUTTON_PRESS && this._showExtendedKeys) {
+            this._menu.actor.hide();
+            this._ungrab();
+            return true;
+        }
+        return false;
+    },
+
+    _ungrab: function () {
+        global.stage.disconnect(this._eventCaptureId);
+        this._eventCaptureId = 0;
+        this._grabbed = false;
+        Main.popModal(this.actor);
+    },
+
     _onShowSubkeys: function () {
         if (this._key.show_subkeys) {
+            this._showExtendedKeys = true;
             this.actor.fake_release();
             this._menu.actor.raise_top();
             this._menu.setPosition(this.actor, 5, 0.5);
             this._menu.show(true);
             this.actor.set_hover(false);
+            if (!this._grabbed) {
+                 Main.pushModal(this.actor);
+                 this._eventCaptureId = global.stage.connect('captured-event', Lang.bind(this, this._onEventCapture));
+                 this._grabbed = true;
+            }
         } else {
-            this._menu.actor.hide();
+            this._showExtendedKeys = false;
+            this._menu.hide(true);
         }
     }
 };
@@ -140,7 +171,6 @@ Keyboard.prototype = {
         this.keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
-
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                            visibleInFullscreen: true,
                                            affectsStruts: false });
