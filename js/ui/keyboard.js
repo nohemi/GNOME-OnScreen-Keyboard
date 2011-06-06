@@ -13,6 +13,7 @@ const BoxPointer = imports.ui.boxpointer;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 
+const MIN_KEY_WIDTH = 30;
 const Pretty_Keys = [
     { name: "BackSpace", label: "\u232b" },
     { name: "space", label: " " },
@@ -80,6 +81,7 @@ Key.prototype = {
 
         label = GLib.markup_escape_text(label, -1);
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
+        button.width = MIN_KEY_WIDTH * this._key.width;
 
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
