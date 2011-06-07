@@ -9,6 +9,7 @@ const St = imports.gi.St;
 const Shell = imports.gi.Shell;
 const Caribou = imports.gi.Caribou;
 
+const MessageTray = imports.ui.messageTray;
 const BoxPointer = imports.ui.boxpointer;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
@@ -162,9 +163,7 @@ function Keyboard() {
 Keyboard.prototype = {
     _init: function () {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
-        this._titleBar = new St.BoxLayout({ style: 'height: 5px;' })
 
-        this.actor.add(this._titleBar);
         this.keyboard = new Caribou.KeyboardModel();
 
         this.groups = {};
@@ -273,6 +272,35 @@ Keyboard.prototype = {
         for each (lname in group.get_levels()) {
             layers[lname].hide();
         }
-        this.current_page = null;
+        let active_level = layers[group.active_level];
+        let source = new KeyboardSource(active_level);
+        Main.messageTray.add(source);
+    }
+};
+
+function KeyboardSource(actor) {
+    this._init(actor);
+}
+
+KeyboardSource.prototype = {
+
+    __proto__: MessageTray.Source.prototype,
+
+    _init: function(actor) {
+        this.actor = actor;
+        MessageTray.Source.prototype._init.call(this, _("Keyboard"));
+
+        this._setSummaryIcon(this.createNotificationIcon());
+    },
+
+    createNotificationIcon: function() {
+        return new St.Icon({ icon_name: 'onscreen-keyboard',
+                             icon_type: St.IconType.SYMBOLIC,
+                             icon_size: this.ICON_SIZE });
+    },
+
+    open: function() {
+        this.actor.show();
+        this.destroy();
     }
 };
