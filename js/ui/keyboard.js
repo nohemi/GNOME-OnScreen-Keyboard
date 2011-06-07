@@ -14,8 +14,6 @@ const BoxPointer = imports.ui.boxpointer;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 
-const MIN_KEY_WIDTH = global.get_primary_monitor().width/11.5;
-const MIN_KEY_HEIGHT = global.get_primary_monitor().height/13.5;
 const Pretty_Keys = [
     { name: "BackSpace", label: "\u232b" },
     { name: "space", label: " " },
@@ -81,8 +79,10 @@ Key.prototype = {
 
         label = GLib.markup_escape_text(label, -1);
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
-        button.width = MIN_KEY_WIDTH * this._key.width;
-        button.height = MIN_KEY_HEIGHT;
+        let primary_monitor = global.get_primary_monitor();
+
+        button.width = primary_monitor.width/11.5 * this._key.width;
+        button.height = primary_monitor.height/13.5;
 
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
@@ -107,8 +107,9 @@ Key.prototype = {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
-            key.width = MIN_KEY_WIDTH * this._key.width;
-            key.height = MIN_KEY_HEIGHT;
+            let primary_monitor = global.get_primary_monitor();
+            key.width = primary_monitor.width/11.5 * this._key.width;
+            key.height = primary_monitor.height/13.5;
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             this._extended_keyboard.add(key);
