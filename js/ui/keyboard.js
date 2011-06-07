@@ -199,7 +199,7 @@ Keyboard.prototype = {
                  let level = group.get_level(lname);
                  let layout = new St.BoxLayout({ style_class: 'keyboard-layout',
                                                  vertical: 'false' });
-                 this._loadRows(level,layout);
+                 this._loadRows(level, layout);
                  layers[lname] = layout;
                  this.actor.add(layout);
                  layout.hide();
@@ -211,19 +211,19 @@ Keyboard.prototype = {
 
     _addRows : function (keys, layout) {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
-        let isSpace = false;
+        let alignEnd = false;
         for each (key in keys) {
             let button = new Key(key);
             keyboard_row.add(button.actor);
-            if (key.name == 'space')
-                isSpace = true;
+            if (key.name == 'Return')
+                alignEnd = true;
             if (key.name == "Caribou_Prefs")
                 key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
         }
-        if (isSpace) {
-            layout.add(keyboard_row, { x_align: St.Align.START, x_fill: false });
-        } else {
+        if (alignEnd) {
             layout.add(keyboard_row, { x_align: St.Align.END, x_fill: false });
+        } else {
+            layout.add(keyboard_row, { x_align: St.Align.START, x_fill: false });
         }
     },
 
