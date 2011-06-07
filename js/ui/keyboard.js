@@ -300,8 +300,23 @@ KeyboardSource.prototype = {
                              icon_size: this.ICON_SIZE });
     },
 
-    open: function() {
-        this.actor.show();
-        this.destroy();
+     handleSummaryClick: function() {
+        let event = Clutter.get_current_event();
+        if (event.type() != Clutter.EventType.BUTTON_RELEASE)
+            return false;
+
+        if (Main.overview.visible) {
+            let id = global.connect('notify::stage-input-mode', Lang.bind(this,
+                function () {
+                    global.disconnect(id);
+                    this.actor.show();
+                    this.destroy();
+                }));
+            Main.overview.hide();
+        } else {
+            this.actor.show();
+            this.destroy();
+        }
+        return true;
     }
 };
