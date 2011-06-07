@@ -13,7 +13,8 @@ const BoxPointer = imports.ui.boxpointer;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 
-const MIN_KEY_WIDTH = 30;
+const MIN_KEY_WIDTH = global.get_primary_monitor().width/11.5;
+const MIN_KEY_HEIGHT = global.get_primary_monitor().height/13.5;
 const Pretty_Keys = [
     { name: "BackSpace", label: "\u232b" },
     { name: "space", label: " " },
@@ -82,6 +83,7 @@ Key.prototype = {
         label = GLib.markup_escape_text(label, -1);
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
         button.width = MIN_KEY_WIDTH * this._key.width;
+        button.height = MIN_KEY_HEIGHT;
 
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
@@ -109,6 +111,8 @@ Key.prototype = {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
+            key.width = MIN_KEY_WIDTH * this._key.width;
+            key.height = MIN_KEY_HEIGHT;
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             this._extended_keyboard.add(key);
@@ -185,6 +189,8 @@ Keyboard.prototype = {
         let primary = global.get_primary_monitor();
         this.actor.x = primary.x;
         this.actor.y = primary.y + primary.height - this.actor.height;
+        this.actor.width = primary.width;
+        this.actor.height = primary.height/3;
     },
 
     _queueReposition: function () {
@@ -211,12 +217,19 @@ Keyboard.prototype = {
     },
 
     _addRows : function (keys, layout) {
-        let box = new St.BoxLayout ({ style_class: 'keyboard-row' });
+        let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
+        let isSpace = false;
         for each (key in keys) {
             let button = new Key(key);
-            box.add(button.actor);
+            keyboard_row.add(button.actor);
+            if (key.name == 'space')
+                isSpace = true;
         }
-        layout.add(box);
+        if (isSpace) {
+            layout.add(keyboard_row, { x_align: St.Align.START, x_fill: false });
+        } else {
+            layout.add(keyboard_row, { x_align: St.Align.END, x_fill: false });
+        }
     },
 
     _loadRows : function (level, layout) {
