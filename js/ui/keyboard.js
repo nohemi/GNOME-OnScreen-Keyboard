@@ -39,8 +39,6 @@ Key.prototype = {
 
         this._extended_keys = this._key.get_extended_keys();
         this._extended_keyboard = {};
-        if (this._key.name == "Caribou_Prefs")
-            this._key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
 
         this._showExtendedKeys = false;
 
@@ -99,9 +97,6 @@ Key.prototype = {
         } else {
             return key.name;
         }
-    },
-
-    _onPrefsClick: function () {
     },
 
     _getExtendedKeys: function () {
@@ -167,7 +162,9 @@ function Keyboard() {
 Keyboard.prototype = {
     _init: function () {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
+        this._titleBar = new St.BoxLayout({ style: 'height: 5px;' })
 
+        this.actor.add(this._titleBar);
         this.keyboard = new Caribou.KeyboardModel();
 
         this.groups = {};
@@ -180,8 +177,7 @@ Keyboard.prototype = {
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                            visibleInFullscreen: true,
-                                           affectsStruts: false });
-
+                                           affectsStruts: true });
         this._reposition();
     },
 
@@ -189,8 +185,6 @@ Keyboard.prototype = {
         let primary = global.get_primary_monitor();
         this.actor.x = primary.x;
         this.actor.y = primary.y + primary.height - this.actor.height;
-        this.actor.width = primary.width;
-        this.actor.height = primary.height/3;
     },
 
     _queueReposition: function () {
@@ -224,12 +218,18 @@ Keyboard.prototype = {
             keyboard_row.add(button.actor);
             if (key.name == 'space')
                 isSpace = true;
+            if (key.name == "Caribou_Prefs")
+                key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
         }
         if (isSpace) {
             layout.add(keyboard_row, { x_align: St.Align.START, x_fill: false });
         } else {
             layout.add(keyboard_row, { x_align: St.Align.END, x_fill: false });
         }
+    },
+
+    _onPrefsClick: function () {
+        this.hide();
     },
 
     _loadRows : function (level, layout) {
@@ -267,6 +267,12 @@ Keyboard.prototype = {
     },
 
     hide: function () {
-        this.actor.hide();
+        let active_group_name = this.keyboard.active_group;
+        let group = this.keyboard.get_group(active_group_name);
+        let layers = this.groups[active_group_name];
+        for each (lname in group.get_levels()) {
+            layers[lname].hide();
+        }
+        this.current_page = null;
     }
 };
