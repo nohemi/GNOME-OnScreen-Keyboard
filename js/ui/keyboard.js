@@ -186,6 +186,7 @@ Keyboard.prototype = {
         let primary = global.get_primary_monitor();
         this.actor.x = primary.x;
         this.actor.y = primary.y + primary.height - this.actor.height;
+        this.actor.height = primary.height/3;
     },
 
     _queueReposition: function () {
@@ -230,6 +231,15 @@ Keyboard.prototype = {
     },
 
     _onPrefsClick: function () {
+        let active_group_name = this.keyboard.active_group;
+        let group = this.keyboard.get_group(active_group_name);
+        let layers = this.groups[active_group_name];
+        for each (lname in group.get_levels()) {
+            layers[lname].hide();
+        }
+        let active_level = layers[group.active_level];
+        let source = new KeyboardSource(this, active_level);
+        Main.messageTray.add(source);
         this.hide();
     },
 
@@ -270,16 +280,7 @@ Keyboard.prototype = {
     },
 
     hide: function () {
-        let active_group_name = this.keyboard.active_group;
-        let group = this.keyboard.get_group(active_group_name);
-        let layers = this.groups[active_group_name];
-        for each (lname in group.get_levels()) {
-            layers[lname].hide();
-        }
-        let active_level = layers[group.active_level];
         this.actor.hide();
-        let source = new KeyboardSource(this, active_level);
-        Main.messageTray.add(source);
         this.showKeyboard = false;
         Main.overview.relayout();
     }
