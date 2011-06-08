@@ -166,6 +166,7 @@ Keyboard.prototype = {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
 
         this.keyboard = new Caribou.KeyboardModel();
+        this.showKeyboard = true;
 
         this.groups = {};
         this.current_page = null;
@@ -264,6 +265,7 @@ Keyboard.prototype = {
 
     show: function () {
         this.actor.show();
+        this.showKeyboard = true;
     },
 
     hide: function () {
@@ -274,21 +276,23 @@ Keyboard.prototype = {
             layers[lname].hide();
         }
         let active_level = layers[group.active_level];
-        let source = new KeyboardSource(active_level);
+        let source = new KeyboardSource(active_level, this.showKeyboard);
         Main.messageTray.add(source);
+        this.showKeyboard = false;
     }
 };
 
-function KeyboardSource(actor) {
-    this._init(actor);
+function KeyboardSource(actor, showKeyboard) {
+    this._init(actor, showKeyboard);
 }
 
 KeyboardSource.prototype = {
 
     __proto__: MessageTray.Source.prototype,
 
-    _init: function(actor) {
+    _init: function(actor, showKeyboard) {
         this.actor = actor;
+        this.showKeyboard = showKeyboard;
         MessageTray.Source.prototype._init.call(this, _("Keyboard"));
 
         this._setSummaryIcon(this.createNotificationIcon());
@@ -312,13 +316,11 @@ KeyboardSource.prototype = {
             let id = global.connect('notify::stage-input-mode', Lang.bind(this,
                 function () {
                     global.disconnect(id);
-                    this.actor.show();
-                    this.destroy();
+                    this.open();
                 }));
             Main.overview.hide();
         } else {
-            this.actor.show();
-            this.destroy();
+            this.open();
         }
         return true;
     },
@@ -326,5 +328,6 @@ KeyboardSource.prototype = {
     open: function() {
         this.actor.show();
         this.destroy();
+        this.showKeyboard = true;
     }
 };
