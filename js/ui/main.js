@@ -146,7 +146,6 @@ function start() {
     statusIconDispatcher.start(messageTray.actor);
 
     keyboard = new Keyboard.Keyboard();
-    keyboard.show();
 
     _startDate = new Date();
 
