@@ -2,6 +2,7 @@
 
 const Clutter = imports.gi.Clutter;
 const Gdk = imports.gi.Gdk;
+const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Lang = imports.lang;
 const Mainloop = imports.mainloop;
@@ -14,6 +15,7 @@ const BoxPointer = imports.ui.boxpointer;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 
+const SHOW_KEYBOARD = 'show-keyboard';
 const Pretty_Keys = [
     { name: "BackSpace", label: "\u232b" },
     { name: "space", label: " " },
@@ -172,6 +174,8 @@ Keyboard.prototype = {
         this.current_page = null;
 
         this._addKeys();
+        this._keyboardSettings = new Gio.Settings({ schema: 'org.gnome.shell.keyboard' });
+        this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChange));
 
         this.keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
@@ -181,6 +185,15 @@ Keyboard.prototype = {
                                            affectsStruts: true });
         this._reposition();
         this.hide();
+    },
+
+    _onSettingsChange: function () {
+        let showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
+        if (showKeyboard) {
+            this.show();
+        } else {
+            this.hide();
+        }
     },
 
     _reposition: function () {
