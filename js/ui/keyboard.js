@@ -305,6 +305,9 @@ KeyboardSource.prototype = {
         if (event.type() != Clutter.EventType.BUTTON_RELEASE)
             return false;
 
+        if (event.get_button() != 1)
+            return false;
+
         if (Main.overview.visible) {
             let id = global.connect('notify::stage-input-mode', Lang.bind(this,
                 function () {
@@ -318,5 +321,10 @@ KeyboardSource.prototype = {
             this.destroy();
         }
         return true;
+    },
+
+    open: function() {
+        this.actor.show();
+        this.destroy();
     }
 };
