@@ -445,6 +445,10 @@ Overview.prototype = {
         let contentY = Main.panel.actor.height;
         let contentHeight = primary.height - contentY - Main.messageTray.actor.height;
 
+        if (Main.keyboard.showKeyboard) {
+            contentHeight = contentHeight - Main.keyboard.actor.height;
+        }
+
         this._group.set_position(primary.x, primary.y);
         this._group.set_size(primary.width, primary.height);
 
@@ -467,7 +471,11 @@ Overview.prototype = {
         }
         this.dash.actor.set_x(dashX);
 
-        this.viewSelector.actor.set_position(viewX, viewY);
+        if (Main.keyboard.showKeyboard) {
+            this.viewSelector.actor.set_position(viewX, contentY);
+        } else {
+            this.viewSelector.actor.set_position(viewX, viewY);
+        }
         this.viewSelector.actor.set_size(viewWidth, viewHeight);
     },
 
