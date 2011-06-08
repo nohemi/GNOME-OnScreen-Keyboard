@@ -194,6 +194,7 @@ Keyboard.prototype = {
         } else {
             this.hide();
         }
+        Main.overview.relayout();
     },
 
     _reposition: function () {
