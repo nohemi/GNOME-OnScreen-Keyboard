@@ -180,12 +180,14 @@ Keyboard.prototype = {
                                            visibleInFullscreen: true,
                                            affectsStruts: true });
         this._reposition();
+        this.hide();
     },
 
     _reposition: function () {
         let primary = global.get_primary_monitor();
         this.actor.x = primary.x;
         this.actor.y = primary.y + primary.height - this.actor.height;
+        this.actor.height = primary.height/3;
     },
 
     _queueReposition: function () {
@@ -230,6 +232,8 @@ Keyboard.prototype = {
     },
 
     _onPrefsClick: function () {
+        let source = new KeyboardSource(this);
+        Main.messageTray.add(source);
         this.hide();
     },
 
@@ -265,6 +269,7 @@ Keyboard.prototype = {
 
     show: function () {
         this.actor.show();
+        this.current_page.show();
         this.showKeyboard = true;
         Main.overview.relayout();
     },
@@ -276,26 +281,23 @@ Keyboard.prototype = {
         for each (lname in group.get_levels()) {
             layers[lname].hide();
         }
-        let active_level = layers[group.active_level];
         this.actor.hide();
-        let source = new KeyboardSource(this, active_level);
-        Main.messageTray.add(source);
         this.showKeyboard = false;
-        Main.overview.relayout();
+        if (Main.overview.visible)
+            Main.overview.relayout();
     }
 };
 
-function KeyboardSource(keyboard, actor) {
-    this._init(keyboard, actor);
+function KeyboardSource(keyboard) {
+    this._init(keyboard);
 }
 
 KeyboardSource.prototype = {
 
     __proto__: MessageTray.Source.prototype,
 
-    _init: function(keyboard, actor) {
+    _init: function(keyboard) {
         this.keyboard = keyboard;
-        this.actor = actor;
         MessageTray.Source.prototype._init.call(this, _("Keyboard"));
 
         this._setSummaryIcon(this.createNotificationIcon());
@@ -320,7 +322,6 @@ KeyboardSource.prototype = {
     },
 
     open: function() {
-        this.actor.show();
         this.keyboard.show();
         this.destroy();
     }
