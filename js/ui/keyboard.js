@@ -184,16 +184,20 @@ Keyboard.prototype = {
                                            visibleInFullscreen: true,
                                            affectsStruts: true });
         this._reposition();
-        this.hide();
+        this._display();
     },
 
-    _onSettingsChange: function () {
+    _display: function () {
         let showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
         if (showKeyboard) {
             this.show();
         } else {
             this.hide();
         }
+    },
+
+    _onSettingsChange: function () {
+        this._display();
         Main.overview.relayout();
     },
 
@@ -249,6 +253,7 @@ Keyboard.prototype = {
         let source = new KeyboardSource(this);
         Main.messageTray.add(source);
         this.hide();
+        Main.overview.relayout();
     },
 
     _loadRows : function (level, layout) {
@@ -285,7 +290,6 @@ Keyboard.prototype = {
         this.actor.show();
         this.current_page.show();
         this.showKeyboard = true;
-        Main.overview.relayout();
     },
 
     hide: function () {
@@ -297,8 +301,6 @@ Keyboard.prototype = {
         }
         this.actor.hide();
         this.showKeyboard = false;
-        if (Main.overview.visible)
-            Main.overview.relayout();
     }
 };
 
@@ -337,6 +339,7 @@ KeyboardSource.prototype = {
 
     open: function() {
         this.keyboard.show();
+        Main.overview.relayout();
         this.destroy();
     }
 };
