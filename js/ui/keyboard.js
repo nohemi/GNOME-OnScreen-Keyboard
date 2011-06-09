@@ -318,7 +318,7 @@ KeyboardSource.prototype = {
     },
 
     createNotificationIcon: function() {
-        return new St.Icon({ icon_name: 'onscreen-keyboard',
+        return new St.Icon({ icon_name: 'input-keyboard',
                              icon_type: St.IconType.SYMBOLIC,
                              icon_size: this.ICON_SIZE });
     },
