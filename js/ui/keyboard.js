@@ -83,8 +83,8 @@ Key.prototype = {
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
         let primary_monitor = global.get_primary_monitor();
 
-        button.width = primary_monitor.width/11.5 * this._key.width;
-        button.height = primary_monitor.height/13.5;
+        button.width = primary_monitor.width/13.75 * this._key.width;
+        button.height = primary_monitor.height/17;
 
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
@@ -110,8 +110,8 @@ Key.prototype = {
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
             let primary_monitor = global.get_primary_monitor();
-            key.width = primary_monitor.width/11.5 * this._key.width;
-            key.height = primary_monitor.height/13.5;
+            key.width = primary_monitor.width/16 * this._key.width;
+            key.height = primary_monitor.height/16;
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             this._extended_keyboard.add(key);

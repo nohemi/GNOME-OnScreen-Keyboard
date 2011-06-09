@@ -1665,39 +1665,42 @@ StTooltip StLabel {
 
 #keyboard {
     border: 1px solid white;
-    background: black;
+    background: rgba(0,0,0,0.8);
 }
 
 .keyboard-layout {
-    spacing: 5px;
-    padding: 5px;
+    spacing: 15px;
+    padding: 15px;
 }
 
 .keyboard-row {
-    spacing: 5px;
+    spacing: 25px;
 }
 
 .keyboard-key {
-    min-height: 30px;
-    min-width: 30px;
+    background-gradient-start: rgba(255,245,245,0.3);
+    background-gradient-end: rgba(105,105,105,0.1);
+    background-gradient-direction: vertical;
+    font-size: 18pt;
     border-radius: 5px;
     border: 1px solid white;
     color: white;
 }
 
 .keyboard-key:hover {
-    background: #303030
+    background: #303030;
+    border: 3px solid white;
 }
 
 .keyboard-key:active {
-    background: #808080
+    background: #808080;
 }
 
 .keyboard-subkeys {
     color: white;
     padding: 5px;
     -arrow-border-radius: 5px;
-    -arrow-background-color: black;
+    -arrow-background-color: rgba(0,0,0,1);
     -arrow-border-width: 1px;
     -arrow-border-color: white;
     -arrow-base: 10px;
