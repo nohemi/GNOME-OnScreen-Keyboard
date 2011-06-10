@@ -122,6 +122,7 @@ Key.prototype = {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
+
             key.width = this._width;
             key.height = this._height;
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
