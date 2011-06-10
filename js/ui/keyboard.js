@@ -15,6 +15,13 @@ const BoxPointer = imports.ui.boxpointer;
 const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
 
+//Measurements used for keyboard display
+const PADDING = 10;
+const VERT_SPACING = 10;
+const HORIZ_SPACING = 15;
+const NUM_OF_VERT_KEYS = 4;
+const NUM_OF_HORIZ_KEYS = 11;
+
 const SHOW_KEYBOARD = 'show-keyboard';
 const Pretty_Keys = [
     { name: "BackSpace", label: "\u232b" },
@@ -36,6 +43,14 @@ function Key(key) {
 Key.prototype = {
     _init : function(key) {
         this._key = key;
+
+        //Measurements for keyboard display
+        let primary_monitor = global.get_primary_monitor();
+        this._width = (primary_monitor.width - (NUM_OF_HORIZ_KEYS - 1) * HORIZ_SPACING
+                        - 2 * PADDING)/ NUM_OF_HORIZ_KEYS  * this._key.width;
+        this._height = (primary_monitor.height/3 - (NUM_OF_VERT_KEYS - 1) * VERT_SPACING
+                         - 2 * PADDING) / NUM_OF_VERT_KEYS;
+
         this.actor = this._getKey();
 
         this._extended_keys = this._key.get_extended_keys();
@@ -81,11 +96,9 @@ Key.prototype = {
 
         label = GLib.markup_escape_text(label, -1);
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
-        let primary_monitor = global.get_primary_monitor();
 
-        button.width = primary_monitor.width/13.75 * this._key.width;
-        button.height = primary_monitor.height/17;
-
+        button.width = this._width;
+        button.height = this._height;
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
 
@@ -109,9 +122,8 @@ Key.prototype = {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
-            let primary_monitor = global.get_primary_monitor();
-            key.width = primary_monitor.width/16 * this._key.width;
-            key.height = primary_monitor.height/16;
+            key.width = this._width;
+            key.height = this._height;
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             this._extended_keyboard.add(key);
