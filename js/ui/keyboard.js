@@ -78,7 +78,7 @@ Key.prototype = {
         if (this._key.name.length > 1) {
             let foundPretty = false;
 
-            for (var i = 0; i < PRETTY_KEYS.length; ++i) {
+            for (let i = 0; i < PRETTY_KEYS.length; ++i) {
                 if (this._key.name == PRETTY_KEYS[i].name) {
                     label = PRETTY_KEYS[i].label;
                     foundPretty = true;
@@ -115,7 +115,7 @@ Key.prototype = {
     _getExtendedKeys: function () {
         this._extended_keyboard = new St.BoxLayout({ style_class: 'keyboard-layout',
                                                      vertical: false });
-        for (let i = 0; i < this._extended_keys.length; i++) {
+        for (let i = 0; i < this._extended_keys.length; ++i) {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
@@ -222,11 +222,13 @@ Keyboard.prototype = {
     },
 
     _addKeys: function () {
-        for each (gname in this._keyboard.get_groups()) {
+        for (let i = 0; i < this._keyboard.get_groups().length; ++i) {
+             let gname = this._keyboard.get_groups()[i];
              let group = this._keyboard.get_group(gname);
              group.connect('notify::active-level', Lang.bind(this, this._onLevelChanged));
              let layers = {};
-             for each (lname in group.get_levels()) {
+             for (let j = 0; j < group.get_levels().length; ++j) {
+                 let lname = group.get_levels()[j];
                  let level = group.get_level(lname);
                  let layout = new St.BoxLayout({ style_class: 'keyboard-layout',
                                                  vertical: 'false' });
@@ -244,7 +246,8 @@ Keyboard.prototype = {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
         let alignEnd = false;
         let primary_monitor = global.get_primary_monitor();
-        for each (key in keys) {
+        for (let i = 0; i < keys.length; ++i) {
+            let key = keys[i];
             let key_width = (primary_monitor.width - (NUM_OF_HORIZ_KEYS - 1) * HORIZ_SPACING
                              - 2 * PADDING)/ NUM_OF_HORIZ_KEYS  * key.width;
             let key_height = (primary_monitor.height / 3 - (NUM_OF_VERT_KEYS - 1) * VERT_SPACING
@@ -272,7 +275,8 @@ Keyboard.prototype = {
 
     _loadRows : function (level, layout) {
         let rows = level.get_rows();
-        for each (row in rows) {
+        for (let i = 0; i < rows.length; ++i) {
+            let row = rows[i];
             this._addRows(row.get_keys(),layout);
         }
 
@@ -310,7 +314,8 @@ Keyboard.prototype = {
         let active_group_name = this._keyboard.active_group;
         let group = this._keyboard.get_group(active_group_name);
         let layers = this._groups[active_group_name];
-        for each (lname in group.get_levels()) {
+        for (let i = 0; i < group.get_levels().length; ++i) {
+            let lname = group.get_levels()[i];
             layers[lname].hide();
         }
         this.actor.hide();
