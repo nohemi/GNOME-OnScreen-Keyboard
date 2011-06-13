@@ -117,7 +117,7 @@ Key.prototype = {
 
     _getExtendedKeys: function () {
         this._extended_keyboard = new St.BoxLayout({ style_class: 'keyboard-layout',
-                                     vertical: false });
+                                                     vertical: false });
         for (let i = 0; i < this._extended_keys.length; i++) {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
@@ -133,7 +133,7 @@ Key.prototype = {
 
     _onEventCapture: function (actor, event) {
         if (event.type() == Clutter.EventType.BUTTON_PRESS) {
-            if(this._extended_keyboard.contains(event.get_source())) {
+            if (this._extended_keyboard.contains(event.get_source())) {
                 this._ungrab();
                 return false;
             }
@@ -217,7 +217,7 @@ Keyboard.prototype = {
         let primary = global.get_primary_monitor();
         this.actor.x = primary.x;
         this.actor.y = primary.y + primary.height - this.actor.height;
-        this.actor.height = primary.height/3;
+        this.actor.height = primary.height / 3;
     },
 
     _queueReposition: function () {
@@ -321,7 +321,6 @@ function KeyboardSource() {
 }
 
 KeyboardSource.prototype = {
-
     __proto__: MessageTray.Source.prototype,
 
     _init: function(keyboard) {
