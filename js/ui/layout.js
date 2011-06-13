@@ -35,8 +35,27 @@ LayoutManager.prototype = {
         for (let i = 0; i < nMonitors; i++)
             this.monitors.push(screen.get_monitor_geometry(i));
 
-        this.primaryIndex = screen.get_primary_monitor();
+        if (nMonitors == 1) {
+            this.primaryIndex = this.bottomIndex = 0;
+        } else {
+            // If there are monitors above the primary, then we need
+            // to redeclare the topmost monitor to be the primary.
+            // Likewise, if there are monitors below it, we need to
+            // split primary from bottom.
+
+            this.primaryIndex = this.bottomIndex = screen.get_primary_monitor();
+            for (let i = 0; i < this.monitors.length; i++) {
+                let monitor = this.monitors[i];
+                if (this._isAboveOrBelowPrimary(monitor)) {
+                    if (monitor.y < this.monitors[this.primaryIndex].y)
+                        this.primaryIndex = i;
+                    else if (monitor.y > this.monitors[this.bottomIndex].y)
+                        this.bottomIndex = i;
+                }
+            }
+        }
         this.primaryMonitor = this.monitors[this.primaryIndex];
+        this.bottomMonitor = this.monitors[this.bottomIndex];
     },
 
     _updateHotCorners: function() {
