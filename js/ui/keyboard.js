@@ -15,11 +15,6 @@ const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
 const PopupMenu = imports.ui.popupMenu;
 
-// Measurements used for keyboard display
-const PADDING = 10;
-const VERT_SPACING = 10;
-const HORIZ_SPACING = 15;
-
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD_KEY = 'show-keyboard';
 // Key constants taken from Antler
@@ -180,8 +175,12 @@ Keyboard.prototype = {
         this._groups = {};
         this._current_page = null;
 
+        // Initialize keyboard key measurements
         this._numOfHorizKeys = 0;
         this._numOfVertKeys = 0;
+        this._horizontalSpacing = 15;
+        this._verticalSpacing = 10;
+        this._padding = 10;
 
         this._addKeys();
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
@@ -211,6 +210,14 @@ Keyboard.prototype = {
         Main.overview.relayout();
     },
 
+    _onStyleChanged: function (actor) {
+        if (actor.get_style_class_name() == 'keyboard-row')
+            this._horizontalSpacing = actor.get_theme_node().get_length('spacing');
+        if (actor.get_style_class_name() == 'keyboard-layout')
+            this._verticalSpacing = actor.get_theme_node().get_length('spacing');
+            this._padding = actor.padding
+    },
+
     _reposition: function () {
         let primary = global.get_primary_monitor();
         this.actor.x = primary.x;
@@ -236,6 +243,13 @@ Keyboard.prototype = {
                  this._loadRows(level, layout);
                  layers[lname] = layout;
                  this.actor.add(layout);
+
+                 // Set layout spacing
+                 if (this._verticalSpacing == 0) {
+                     layout.spacing = 0;
+                     layout.connect('style-changed', Lang.bind(this, this._onStyleChanged));
+                 }
+
                  layout.hide();
              }
              this._groups[gname] = layers;
@@ -251,10 +265,10 @@ Keyboard.prototype = {
             if (this._numOfHorizKeys == 0)
                 this._numOfHorizKeys = keys.length;
             let key = keys[i];
-            let key_width = (primary_monitor.width - (this._numOfHorizKeys - 1) * HORIZ_SPACING
-                             - 2 * PADDING)/ this._numOfHorizKeys  * key.width;
-            let key_height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * VERT_SPACING
-                              - 2 * PADDING) / this._numOfVertKeys;
+            let key_width = (primary_monitor.width - (this._numOfHorizKeys - 1) * this._horizontalSpacing
+                             - 2 * this._padding)/ this._numOfHorizKeys * key.width;
+            let key_height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
+                              - 2 * this._padding) / this._numOfVertKeys;
             let button = new Key(key, key_width, key_height);
             keyboard_row.add(button.actor);
             if (key.name == 'Return')
