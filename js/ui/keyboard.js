@@ -179,17 +179,17 @@ Keyboard.prototype = {
     _init: function () {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
 
-        this.keyboard = new Caribou.KeyboardModel();
+        this._keyboard = new Caribou.KeyboardModel();
         this.showKeyboard = true;
 
-        this.groups = {};
-        this.current_page = null;
+        this._groups = {};
+        this._current_page = null;
 
         this._addKeys();
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChange));
 
-        this.keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
+        this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
@@ -225,8 +225,8 @@ Keyboard.prototype = {
     },
 
     _addKeys: function () {
-        for each (gname in this.keyboard.get_groups()) {
-             let group = this.keyboard.get_group(gname);
+        for each (gname in this._keyboard.get_groups()) {
+             let group = this._keyboard.get_group(gname);
              group.connect('notify::active-level', Lang.bind(this, this._onLevelChanged));
              let layers = {};
              for each (lname in group.get_levels()) {
@@ -238,7 +238,7 @@ Keyboard.prototype = {
                  this.actor.add(layout);
                  layout.hide();
              }
-             this.groups[gname] = layers;
+             this._groups[gname] = layers;
         }
         this._setActiveLayer();
     },
@@ -285,29 +285,29 @@ Keyboard.prototype = {
     },
 
     _setActiveLayer: function () {
-        let active_group_name = this.keyboard.active_group;
-        let active_group = this.keyboard.get_group(active_group_name);
+        let active_group_name = this._keyboard.active_group;
+        let active_group = this._keyboard.get_group(active_group_name);
         let active_level = active_group.active_level;
-        let layers = this.groups[active_group_name];
+        let layers = this._groups[active_group_name];
 
-        if (this.current_page != null) {
-            this.current_page.hide();
+        if (this._current_page != null) {
+            this._current_page.hide();
         }
 
-        this.current_page = layers[active_level];
+        this._current_page = layers[active_level];
         layers[active_level].show();
     },
 
     show: function () {
         this.actor.show();
-        this.current_page.show();
+        this._current_page.show();
         this.showKeyboard = true;
     },
 
     hide: function () {
-        let active_group_name = this.keyboard.active_group;
-        let group = this.keyboard.get_group(active_group_name);
-        let layers = this.groups[active_group_name];
+        let active_group_name = this._keyboard.active_group;
+        let group = this._keyboard.get_group(active_group_name);
+        let layers = this._groups[active_group_name];
         for each (lname in group.get_levels()) {
             layers[lname].hide();
         }
@@ -324,7 +324,7 @@ KeyboardSource.prototype = {
     __proto__: MessageTray.Source.prototype,
 
     _init: function(keyboard) {
-        this.keyboard = keyboard;
+        this._keyboard = keyboard;
         MessageTray.Source.prototype._init.call(this, _("Keyboard"));
 
         this._setSummaryIcon(this.createNotificationIcon());
@@ -349,7 +349,7 @@ KeyboardSource.prototype = {
     },
 
     open: function() {
-        this.keyboard.show();
+        this._keyboard.show();
         Main.overview.relayout();
         this.destroy();
     }
