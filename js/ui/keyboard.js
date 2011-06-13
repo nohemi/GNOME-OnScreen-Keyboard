@@ -63,10 +63,11 @@ Key.prototype = {
             this._eventCaptureId = 0;
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeysChanged));
             this._boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
-                                                   { style_class: 'keyboard-subkeys',
-                                                     x_fill: true,
+                                                   { x_fill: true,
                                                      y_fill: true,
                                                      x_align: St.Align.START });
+            // Adds style to existing keyboard style to avoid repetition
+            this._boxPointer.actor.add_style_class_name('keyboard-subkeys');
             this._getExtendedKeys();
             this._boxPointer.actor.hide();
             Main.chrome.addActor(this._boxPointer.actor, { visibleInOverview: true,
