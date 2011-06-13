@@ -38,8 +38,8 @@ const PRETTY_KEYS = [
     { name: "Caribou_Alpha", label: "Abc" }
 ];
 
-function Key(key) {
-    this._init(key);
+function Key() {
+    this._init.apply(this, arguments);
 }
 
 Key.prototype = {
