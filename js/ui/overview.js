@@ -447,6 +447,9 @@ Overview.prototype = {
         this.hide();
 
         let primary = Main.layoutManager.primaryMonitor;
+        let rtl = (St.Widget.get_default_direction () == St.TextDirection.RTL);
+
+        let primary = Main.layoutManager.primaryMonitor;
         let content = Main.layoutManager.overviewContentArea;
         let rtl = (St.Widget.get_default_direction () == St.TextDirection.RTL);
 
