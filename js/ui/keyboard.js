@@ -43,15 +43,11 @@ function Key() {
 }
 
 Key.prototype = {
-    _init : function(key) {
+    _init : function(key, key_width, key_height) {
         this._key = key;
 
-        // Measurements for keyboard display
-        let primary_monitor = global.get_primary_monitor();
-        this._width = (primary_monitor.width - (NUM_OF_HORIZ_KEYS - 1) * HORIZ_SPACING
-                        - 2 * PADDING)/ NUM_OF_HORIZ_KEYS  * this._key.width;
-        this._height = (primary_monitor.height/3 - (NUM_OF_VERT_KEYS - 1) * VERT_SPACING
-                         - 2 * PADDING) / NUM_OF_VERT_KEYS;
+        this._width = key_width;
+        this._height = key_height;
 
         this.actor = this._getKey();
 
@@ -247,8 +243,13 @@ Keyboard.prototype = {
     _addRows : function (keys, layout) {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
         let alignEnd = false;
+        let primary_monitor = global.get_primary_monitor();
         for each (key in keys) {
-            let button = new Key(key);
+            let key_width = (primary_monitor.width - (NUM_OF_HORIZ_KEYS - 1) * HORIZ_SPACING
+                             - 2 * PADDING)/ NUM_OF_HORIZ_KEYS  * key.width;
+            let key_height = (primary_monitor.height / 3 - (NUM_OF_VERT_KEYS - 1) * VERT_SPACING
+                              - 2 * PADDING) / NUM_OF_VERT_KEYS;
+            let button = new Key(key, key_width, key_height);
             keyboard_row.add(button.actor);
             if (key.name == 'Return')
                 alignEnd = true;
