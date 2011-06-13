@@ -164,6 +164,8 @@ Key.prototype = {
                  this._grabbed = true;
             }
         } else {
+            if (this._grabbed)
+                this._ungrab();
             this._boxPointer.hide(true);
         }
     }
