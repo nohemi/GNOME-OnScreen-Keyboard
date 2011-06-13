@@ -1,19 +1,19 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
+const Caribou = imports.gi.Caribou;
 const Clutter = imports.gi.Clutter;
 const Gdk = imports.gi.Gdk;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Lang = imports.lang;
 const Mainloop = imports.mainloop;
-const St = imports.gi.St;
 const Shell = imports.gi.Shell;
-const Caribou = imports.gi.Caribou;
+const St = imports.gi.St;
 
-const MessageTray = imports.ui.messageTray;
 const BoxPointer = imports.ui.boxpointer;
-const PopupMenu = imports.ui.popupMenu;
 const Main = imports.ui.main;
+const MessageTray = imports.ui.messageTray;
+const PopupMenu = imports.ui.popupMenu;
 
 //Measurements used for keyboard display
 const PADDING = 10;
@@ -22,8 +22,10 @@ const HORIZ_SPACING = 15;
 const NUM_OF_VERT_KEYS = 4;
 const NUM_OF_HORIZ_KEYS = 11;
 
-const SHOW_KEYBOARD = 'show-keyboard';
-const Pretty_Keys = [
+const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
+const SHOW_KEYBOARD_KEY = 'show-keyboard';
+//Key constants taken from Antler
+const PRETTY_KEYS = [
     { name: "BackSpace", label: "\u232b" },
     { name: "space", label: " " },
     { name: "Return", label: "\u23ce" },
@@ -81,9 +83,9 @@ Key.prototype = {
         if (this._key.name.length > 1) {
             let foundPretty = false;
 
-            for (var i = 0; i < Pretty_Keys.length; ++i) {
-                if (this._key.name == Pretty_Keys[i].name) {
-                    label = Pretty_Keys[i].label;
+            for (var i = 0; i < PRETTY_KEYS.length; ++i) {
+                if (this._key.name == PRETTY_KEYS[i].name) {
+                    label = PRETTY_KEYS[i].label;
                     foundPretty = true;
                     break;
                 }
@@ -186,7 +188,7 @@ Keyboard.prototype = {
         this.current_page = null;
 
         this._addKeys();
-        this._keyboardSettings = new Gio.Settings({ schema: 'org.gnome.shell.keyboard' });
+        this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChange));
 
         this.keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
@@ -200,8 +202,8 @@ Keyboard.prototype = {
     },
 
     _display: function () {
-        let showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
-        if (showKeyboard) {
+        let showKeyboardKey = this._keyboardSettings.get_boolean(SHOW_KEYBOARD_KEY);
+        if (showKeyboardKey) {
             this.show();
         } else {
             this.hide();
