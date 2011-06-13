@@ -61,7 +61,7 @@ Key.prototype = {
         if (this._extended_keys.length > 0) {
             this._grabbed = false;
             this._eventCaptureId = 0;
-            this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
+            this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeysChanged));
             this._boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
                                                    { style_class: 'keyboard-subkeys',
                                                      x_fill: true,
@@ -151,7 +151,7 @@ Key.prototype = {
         Main.popModal(this.actor);
     },
 
-    _onShowSubkeys: function () {
+    _onShowSubkeysChanged: function () {
         if (this._key.show_subkeys) {
             this.actor.fake_release();
             this._boxPointer.actor.raise_top();
