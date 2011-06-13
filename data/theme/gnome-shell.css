@@ -1702,6 +1702,7 @@ StTooltip StLabel {
 .keyboard-subkeys {
     color: white;
     padding: 5px;
+    background: rgba(0,0,0,1);
     -arrow-border-radius: 10px;
     -arrow-background-color: rgba(0,0,0,1);
     -arrow-border-width: 2px;
