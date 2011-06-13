@@ -15,7 +15,7 @@ const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
 const PopupMenu = imports.ui.popupMenu;
 
-//Measurements used for keyboard display
+// Measurements used for keyboard display
 const PADDING = 10;
 const VERT_SPACING = 10;
 const HORIZ_SPACING = 15;
@@ -24,7 +24,7 @@ const NUM_OF_HORIZ_KEYS = 11;
 
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD_KEY = 'show-keyboard';
-//Key constants taken from Antler
+// Key constants taken from Antler
 const PRETTY_KEYS = [
     { name: "BackSpace", label: "\u232b" },
     { name: "space", label: " " },
@@ -46,7 +46,7 @@ Key.prototype = {
     _init : function(key) {
         this._key = key;
 
-        //Measurements for keyboard display
+        // Measurements for keyboard display
         let primary_monitor = global.get_primary_monitor();
         this._width = (primary_monitor.width - (NUM_OF_HORIZ_KEYS - 1) * HORIZ_SPACING
                         - 2 * PADDING)/ NUM_OF_HORIZ_KEYS  * this._key.width;
