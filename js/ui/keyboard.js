@@ -58,18 +58,15 @@ Key.prototype = {
         this._extended_keys = this._key.get_extended_keys();
         this._extended_keyboard = {};
 
-        this._showExtendedKeys = false;
-
         if (this._extended_keys.length > 0) {
             this._grabbed = false;
             this._eventCaptureId = 0;
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
             this._boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
-                                                   { x_fill: true,
+                                                   { style_class: 'keyboard-subkeys',
+                                                     x_fill: true,
                                                      y_fill: true,
-                                                     x_align: St.Align.START,
-                                                     style_class: 'keyboard-subkeys' });
-//            this._menu.actor.add_style_class_name('keyboard-subkeys');
+                                                     x_align: St.Align.START });
             this._getExtendedKeys();
             this._boxPointer.actor.hide();
             Main.chrome.addActor(this._boxPointer.actor, { visibleInOverview: true,
@@ -135,7 +132,7 @@ Key.prototype = {
     },
 
     _onEventCapture: function (actor, event) {
-        if (event.type() == Clutter.EventType.BUTTON_PRESS && this._showExtendedKeys) {
+        if (event.type() == Clutter.EventType.BUTTON_PRESS) {
             if(this._extended_keyboard.contains(event.get_source())) {
                 this._ungrab();
                 return false;
@@ -156,7 +153,6 @@ Key.prototype = {
 
     _onShowSubkeys: function () {
         if (this._key.show_subkeys) {
-            this._showExtendedKeys = true;
             this.actor.fake_release();
             this._boxPointer.actor.raise_top();
             this._boxPointer.setPosition(this.actor, 5, 0.5);
@@ -168,7 +164,6 @@ Key.prototype = {
                  this._grabbed = true;
             }
         } else {
-            this._showExtendedKeys = false;
             this._boxPointer.hide(true);
         }
     }
