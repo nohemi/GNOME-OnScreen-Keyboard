@@ -185,7 +185,7 @@ Keyboard.prototype = {
 
         this._addKeys();
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
-        this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChange));
+        this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChanged));
 
         this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
@@ -206,7 +206,7 @@ Keyboard.prototype = {
         }
     },
 
-    _onSettingsChange: function () {
+    _onSettingsChanged: function () {
         this._display();
         Main.overview.relayout();
     },
