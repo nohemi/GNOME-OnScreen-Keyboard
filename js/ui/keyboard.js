@@ -64,14 +64,15 @@ Key.prototype = {
             this._grabbed = false;
             this._eventCaptureId = 0;
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeys));
-            this._menu = new BoxPointer.BoxPointer(St.Side.BOTTOM,
+            this._boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
                                                    { x_fill: true,
                                                      y_fill: true,
-                                                     x_align: St.Align.START });
-            this._menu.actor.add_style_class_name('keyboard-subkeys');
+                                                     x_align: St.Align.START,
+                                                     style_class: 'keyboard-subkeys' });
+//            this._menu.actor.add_style_class_name('keyboard-subkeys');
             this._getExtendedKeys();
-            this._menu.actor.hide();
-            Main.chrome.addActor(this._menu.actor, { visibleInOverview: true,
+            this._boxPointer.actor.hide();
+            Main.chrome.addActor(this._boxPointer.actor, { visibleInOverview: true,
                                                      visibleInFullscreen: true,
                                                      affectsStruts: false });
         }
@@ -130,7 +131,7 @@ Key.prototype = {
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             this._extended_keyboard.add(key);
         }
-        this._menu.bin.add_actor(this._extended_keyboard);
+        this._boxPointer.bin.add_actor(this._extended_keyboard);
     },
 
     _onEventCapture: function (actor, event) {
@@ -139,7 +140,7 @@ Key.prototype = {
                 this._ungrab();
                 return false;
             }
-            this._menu.actor.hide();
+            this._boxPointer.actor.hide();
             this._ungrab();
             return true;
         }
@@ -157,9 +158,9 @@ Key.prototype = {
         if (this._key.show_subkeys) {
             this._showExtendedKeys = true;
             this.actor.fake_release();
-            this._menu.actor.raise_top();
-            this._menu.setPosition(this.actor, 5, 0.5);
-            this._menu.show(true);
+            this._boxPointer.actor.raise_top();
+            this._boxPointer.setPosition(this.actor, 5, 0.5);
+            this._boxPointer.show(true);
             this.actor.set_hover(false);
             if (!this._grabbed) {
                  Main.pushModal(this.actor);
@@ -168,7 +169,7 @@ Key.prototype = {
             }
         } else {
             this._showExtendedKeys = false;
-            this._menu.hide(true);
+            this._boxPointer.hide(true);
         }
     }
 };
