@@ -316,8 +316,8 @@ Keyboard.prototype = {
     }
 };
 
-function KeyboardSource(keyboard) {
-    this._init(keyboard);
+function KeyboardSource() {
+    this._init.apply(this, arguments);
 }
 
 KeyboardSource.prototype = {
