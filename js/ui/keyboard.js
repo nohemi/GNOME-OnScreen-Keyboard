@@ -19,8 +19,6 @@ const PopupMenu = imports.ui.popupMenu;
 const PADDING = 10;
 const VERT_SPACING = 10;
 const HORIZ_SPACING = 15;
-const NUM_OF_VERT_KEYS = 4;
-const NUM_OF_HORIZ_KEYS = 11;
 
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD_KEY = 'show-keyboard';
@@ -182,6 +180,9 @@ Keyboard.prototype = {
         this._groups = {};
         this._current_page = null;
 
+        this._numOfHorizKeys = 0;
+        this._numOfVertKeys = 0;
+
         this._addKeys();
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChange));
@@ -247,11 +248,13 @@ Keyboard.prototype = {
         let alignEnd = false;
         let primary_monitor = global.get_primary_monitor();
         for (let i = 0; i < keys.length; ++i) {
+            if (this._numOfHorizKeys == 0)
+                this._numOfHorizKeys = keys.length;
             let key = keys[i];
-            let key_width = (primary_monitor.width - (NUM_OF_HORIZ_KEYS - 1) * HORIZ_SPACING
-                             - 2 * PADDING)/ NUM_OF_HORIZ_KEYS  * key.width;
-            let key_height = (primary_monitor.height / 3 - (NUM_OF_VERT_KEYS - 1) * VERT_SPACING
-                              - 2 * PADDING) / NUM_OF_VERT_KEYS;
+            let key_width = (primary_monitor.width - (this._numOfHorizKeys - 1) * HORIZ_SPACING
+                             - 2 * PADDING)/ this._numOfHorizKeys  * key.width;
+            let key_height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * VERT_SPACING
+                              - 2 * PADDING) / this._numOfVertKeys;
             let button = new Key(key, key_width, key_height);
             keyboard_row.add(button.actor);
             if (key.name == 'Return')
@@ -277,6 +280,8 @@ Keyboard.prototype = {
         let rows = level.get_rows();
         for (let i = 0; i < rows.length; ++i) {
             let row = rows[i];
+            if (this._numOfVertKeys == 0)
+                this._numOfVertKeys = rows.length;
             this._addRows(row.get_keys(),layout);
         }
 
