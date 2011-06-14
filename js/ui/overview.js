@@ -446,21 +446,19 @@ Overview.prototype = {
         this.hide();
 
         let primary = Main.layoutManager.primaryMonitor;
+        let content = Main.layoutManager.overviewContentArea;
         let rtl = (St.Widget.get_default_direction () == St.TextDirection.RTL);
-
-        let contentY = Main.panel.actor.height;
-        let contentHeight = primary.height - contentY - Main.messageTray.actor.height;
 
         this._group.set_position(primary.x, primary.y);
         this._group.set_size(primary.width, primary.height);
 
-        this._coverPane.set_position(0, contentY);
-        this._coverPane.set_size(primary.width, contentHeight);
+        this._coverPane.set_position(0, content.y);
+        this._coverPane.set_size(primary.width, content.height);
 
         let dashWidth = Math.round(DASH_SPLIT_FRACTION * primary.width);
         let viewWidth = primary.width - dashWidth - this._spacing;
-        let viewHeight = contentHeight - 2 * this._spacing;
-        let viewY = contentY + this._spacing;
+        let viewHeight = content.height - 2 * this._spacing;
+        let viewY = content.y + this._spacing;
         let viewX = rtl ? 0 : dashWidth + this._spacing;
 
         // Set the dash's x position - y is handled by a constraint
