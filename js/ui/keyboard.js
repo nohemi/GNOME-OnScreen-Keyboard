@@ -113,6 +113,7 @@ Key.prototype = {
         let button = new St.Button ({ label: label, style_class: 'keyboard-key' });
 
         button.width = this._width;
+        button.key_width = this._key.width;
         button.height = this._height;
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
@@ -205,8 +206,8 @@ Keyboard.prototype = {
         this._numOfHorizKeys = 0;
         this._numOfVertKeys = 0;
         this._horizontalSpacing = 15;
-        this._verticalSpacing = 0;
-        this._padding = 0;
+        this._verticalSpacing = 10;
+        this._padding = 10;
 
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._display));
@@ -239,7 +240,6 @@ Keyboard.prototype = {
     },
 
     _onStyleChanged: function (actor) {
-        Main.uiGroup.add_actor(this.actor);
         if (actor.style_class == 'keyboard-row')
             this._horizontalSpacing = actor.get_theme_node().get_length('spacing');
         if (actor.style_class == 'keyboard-layout') {
@@ -274,11 +274,6 @@ Keyboard.prototype = {
                  layers[lname] = layout;
                  this.actor.add(layout);
 
-                 // Set layout spacing
-                 if (this._verticalSpacing == 0) {
-                     layout.connect('style-changed', Lang.bind(this, this._onStyleChanged));
-                     this._onStyleChanged(layout);
-                 }
                  layout.hide();
              }
              this._groups[gname] = layers;
@@ -331,6 +326,29 @@ Keyboard.prototype = {
 
     },
 
+    _redraw: function () {
+        if (this._verticalSpacing == 0)
+            this._current_page.connect('style-changed', Lang.bind(this, this._onStyleChanged));
+
+        let primary_monitor = Main.layoutManager.primaryMonitor;
+        for (let i = 0; i < this._current_page.get_children().length; ++i) {
+            let keyboard_row = this._current_page.get_children()[i];
+
+            if (this._horizontalSpacing == 0)
+                keyboard_row.connect('style-changed', Lang.bind(this, this._onStyleChanged));
+
+            this._onStyleChanged(keyboard_row);
+            this._onStyleChanged(this._current_page);
+            for (let j = 0; j < keyboard_row.get_children().length; ++j) {
+                let child = keyboard_row.get_children()[j];
+                child.width = (primary_monitor.width - (this._numOfHorizKeys - 1) * this._horizontalSpacing
+                             - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
+                child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
+                              - 2 * this._padding) / this._numOfVertKeys;
+            }
+        }
+    },
+
     _onLevelChanged: function () {
         this._setActiveLayer();
     },
@@ -354,6 +372,7 @@ Keyboard.prototype = {
     },
 
     show: function () {
+        this._redraw();
         this.actor.show();
         this._current_page.show();
     },
