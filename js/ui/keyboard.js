@@ -180,8 +180,8 @@ Keyboard.prototype = {
         this._numOfHorizKeys = 0;
         this._numOfVertKeys = 0;
         this._horizontalSpacing = 15;
-        this._verticalSpacing = 10;
-        this._padding = 10;
+        this._verticalSpacing = 0;
+        this._padding = 0;
 
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChanged));
@@ -219,11 +219,13 @@ Keyboard.prototype = {
     },
 
     _onStyleChanged: function (actor) {
-        if (actor.get_style_class_name() == 'keyboard-row')
+        Main.uiGroup.add_actor(this.actor);
+        if (actor.style_class == 'keyboard-row')
             this._horizontalSpacing = actor.get_theme_node().get_length('spacing');
-        if (actor.get_style_class_name() == 'keyboard-layout')
+        if (actor.style_class == 'keyboard-layout') {
             this._verticalSpacing = actor.get_theme_node().get_length('spacing');
-            this._padding = actor.padding
+            this._padding = actor.get_theme_node().get_length('padding');
+        }
     },
 
     _reposition: function () {
@@ -254,10 +256,9 @@ Keyboard.prototype = {
 
                  // Set layout spacing
                  if (this._verticalSpacing == 0) {
-                     layout.spacing = 0;
                      layout.connect('style-changed', Lang.bind(this, this._onStyleChanged));
+                     this._onStyleChanged(layout);
                  }
-
                  layout.hide();
              }
              this._groups[gname] = layers;
