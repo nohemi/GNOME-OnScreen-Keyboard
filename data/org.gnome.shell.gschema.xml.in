@@ -91,6 +91,7 @@
       <_description>
         If true, enable keyboard dragging.
       </_description>
+    </key>
   </schema>
 
   <schema id="org.gnome.shell.clock" path="/org/gnome/shell/clock/"
