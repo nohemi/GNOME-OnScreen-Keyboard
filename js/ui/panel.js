@@ -545,12 +545,13 @@ AppMenuButton.prototype = {
 Signals.addSignalMethods(AppMenuButton.prototype);
 
 
-function PanelCorner(side) {
-    this._init(side);
+function PanelCorner(panel, side) {
+    this._init(panel, side);
 }
 
 PanelCorner.prototype = {
-    _init: function(side) {
+    _init: function(panel, side) {
+        this._panel = panel;
         this._side = side;
         this.actor = new St.DrawingArea({ style_class: 'panel-corner' });
         this.actor.connect('repaint', Lang.bind(this, this._repaint));
@@ -626,11 +627,11 @@ PanelCorner.prototype = {
         this.actor.set_size(cornerRadius,
                             innerBorderWidth + cornerRadius);
         if (this._side == St.Side.LEFT)
-            this.actor.set_position(Main.panel.actor.x,
-                                    Main.panel.actor.y + Main.panel.actor.height - innerBorderWidth);
+            this.actor.set_position(this._panel.actor.x,
+                                    this._panel.actor.y + this._panel.actor.height - innerBorderWidth);
         else
-            this.actor.set_position(Main.panel.actor.x + Main.panel.actor.width - cornerRadius,
-                                    Main.panel.actor.y + Main.panel.actor.height - innerBorderWidth);
+            this.actor.set_position(this._panel.actor.x + this._panel.actor.width - cornerRadius,
+                                    this._panel.actor.y + this._panel.actor.height - innerBorderWidth);
     }
 };
 
@@ -834,8 +835,8 @@ Panel.prototype = {
         this._centerBox = new St.BoxLayout({ name: 'panelCenter' });
         this._rightBox = new St.BoxLayout({ name: 'panelRight' });
 
-        this._leftCorner = new PanelCorner(St.Side.LEFT);
-        this._rightCorner = new PanelCorner(St.Side.RIGHT);
+        this._leftCorner = new PanelCorner(this, St.Side.LEFT);
+        this._rightCorner = new PanelCorner(this, St.Side.RIGHT);
 
         /* This box container ensures that the centerBox is positioned in the *absolute*
          * center, but can be pushed aside if necessary. */
@@ -1014,6 +1015,9 @@ Panel.prototype = {
 
         Main.ctrlAltTabManager.addGroup(this.actor, _("Top Bar"), 'start-here',
                                         { sortGroup: CtrlAltTab.SortGroup.TOP });
+
+        Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._relayout));
+        this._relayout();
     },
 
     _xdndShowOverview: function (actor) {
@@ -1087,8 +1091,8 @@ Panel.prototype = {
                          });
     },
 
-    relayout: function() {
-        let primary = global.get_primary_monitor();
+    _relayout: function() {
+        let primary = Main.layoutManager.primaryMonitor;
 
         this.actor.set_position(primary.x, primary.y);
         this.actor.set_size(primary.width, -1);
