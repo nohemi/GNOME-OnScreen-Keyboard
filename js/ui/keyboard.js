@@ -52,10 +52,11 @@ Key.prototype = {
             this._grabbed = false;
             this._eventCaptureId = 0;
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeysChanged));
-            this._boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
+            this.actor.boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
                                                    { x_fill: true,
                                                      y_fill: true,
                                                      x_align: St.Align.START });
+            this._boxPointer = this.actor.boxPointer;
             // Adds style to existing keyboard style to avoid repetition
             this._boxPointer.actor.add_style_class_name('keyboard-subkeys');
             this._getExtendedKeys();
@@ -179,9 +180,6 @@ Keyboard.prototype = {
         // Initialize keyboard key measurements
         this._numOfHorizKeys = 0;
         this._numOfVertKeys = 0;
-        this._horizontalSpacing = 15;
-        this._verticalSpacing = 10;
-        this._padding = 10;
 
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._display));
@@ -263,13 +261,7 @@ Keyboard.prototype = {
             if (this._numOfHorizKeys == 0)
                 this._numOfHorizKeys = keys.length;
             let key = keys[i];
-            let key_width = (primary_monitor.width - (this._numOfHorizKeys - 1) * this._horizontalSpacing
-                             - 2 * this._padding)/ this._numOfHorizKeys * key.width;
-            let key_height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
-                              - 2 * this._padding) / this._numOfVertKeys;
-            if (this._draggable)
-                key_width = key_height * key.width;
-            let button = new Key(key, key_width, key_height);
+            let button = new Key(key, 0, 0);
             keyboard_row.add(button.actor);
             if (key.name == 'Return')
                 alignEnd = true;
@@ -319,6 +311,14 @@ Keyboard.prototype = {
                              - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
                 child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
                               - 2 * this._padding) / this._numOfVertKeys;
+               if (child.boxPointer) {
+                   let extended_keys = child.boxPointer.bin.get_children()[0];
+                   for (let k = 0; k < extended_keys.get_children().length; ++k) {
+                       let extended_key = extended_keys.get_children()[k];
+                       extended_key.width = child.width;
+                       extended_key.height = child.height;
+                   }
+               }
             }
         }
     },
