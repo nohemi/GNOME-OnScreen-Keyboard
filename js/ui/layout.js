@@ -33,12 +33,15 @@ LayoutManager.prototype = {
     init: function() {
         this._panelHeight = Main.panel.actor.height;
         this._trayHeight = Main.messageTray.actor.height;
+        this._keyboardHeight = Main.keyboard.actor.height;
 
         global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
         this._updateHotCorners();
 
         Main.panel.actor.connect('allocation-changed', Lang.bind(this, this._allocationChanged));
         Main.messageTray.actor.connect('allocation-changed', Lang.bind(this, this._allocationChanged));
+        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._allocationChanged));
+        Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._visibilityChanged));
         this._updateContentArea();
     },
 
@@ -74,6 +77,7 @@ LayoutManager.prototype = {
         let primaryContentArea = new Meta.Rectangle(this.primaryMonitor);
         primaryContentArea.y += this._panelHeight;
         primaryContentArea.height -= this._panelHeight;
+        primaryContentArea.height -= this._keyboardHeight;
         if (!this.primaryContentArea.equal(primaryContentArea)) {
             this.primaryContentArea = primaryContentArea;
             changed = true;
@@ -86,8 +90,10 @@ LayoutManager.prototype = {
             changed = true;
         }
 
-        if (changed)
+        if (changed) {
             this.emit('content-area-changed');
+            this.emit('monitors-changed'); // FIXME
+        }
     },
 
     _updateHotCorners: function() {
@@ -159,6 +165,17 @@ LayoutManager.prototype = {
             this._panelHeight = height;
         else if (actor == Main.messageTray.actor)
             this._trayHeight = height;
+        else if (actor == Main.keyboard.actor && Main.keyboard.actor.visible)
+            this._keyboardHeight = height;
+
+        this._updateContentArea();
+    },
+
+    _visibilityChanged: function(actor) {
+        if (Main.keyboard.actor.visible)
+            this._keyboardHeight = Main.keyboard.actor.height;
+        else
+            this._keyboardHeight = 0;
 
         this._updateContentArea();
     },

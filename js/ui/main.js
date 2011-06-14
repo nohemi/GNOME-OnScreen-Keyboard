@@ -144,12 +144,11 @@ function start() {
     notificationDaemon = new NotificationDaemon.NotificationDaemon();
     windowAttentionHandler = new WindowAttentionHandler.WindowAttentionHandler();
     telepathyClient = new TelepathyClient.Client();
+    keyboard = new Keyboard.Keyboard();
 
     layoutManager.init();
     overview.init();
     statusIconDispatcher.start(messageTray.actor);
-
-    keyboard = new Keyboard.Keyboard();
 
     _startDate = new Date();
 

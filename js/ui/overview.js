@@ -453,8 +453,8 @@ Overview.prototype = {
         this._group.set_position(primary.x, primary.y);
         this._group.set_size(primary.width, primary.height);
 
-        this._coverPane.set_position(0, content.y);
-        this._coverPane.set_size(primary.width, content.height);
+        this._coverPane.set_position(content.x, content.y);
+        this._coverPane.set_size(content.width, content.height);
 
         let dashWidth = Math.round(DASH_SPLIT_FRACTION * primary.width);
         let viewWidth = primary.width - dashWidth - this._spacing;
@@ -472,11 +472,7 @@ Overview.prototype = {
         }
         this.dash.actor.set_x(dashX);
 
-        if (Main.keyboard.showKeyboard) {
-            this.viewSelector.actor.set_position(viewX, contentY);
-        } else {
-            this.viewSelector.actor.set_position(viewX, viewY);
-        }
+        this.viewSelector.actor.set_position(viewX, viewY);
         this.viewSelector.actor.set_size(viewWidth, viewHeight);
     },
 
