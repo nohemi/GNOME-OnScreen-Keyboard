@@ -171,7 +171,6 @@ Keyboard.prototype = {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
 
         this._keyboard = new Caribou.KeyboardModel();
-        this.showKeyboard = true;
 
         this._groups = {};
         this._current_page = null;
@@ -184,7 +183,7 @@ Keyboard.prototype = {
         this._padding = 0;
 
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
-        this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChanged));
+        this._keyboardSettings.connect('changed', Lang.bind(this, this._display));
         this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
         this._addKeys();
 
@@ -211,11 +210,6 @@ Keyboard.prototype = {
         } else {
             this.hide();
         }
-    },
-
-    _onSettingsChanged: function () {
-        this._display();
-        Main.overview.relayout();
     },
 
     _onStyleChanged: function (actor) {
@@ -336,13 +330,11 @@ Keyboard.prototype = {
     show: function () {
         this.actor.show();
         this._current_page.show();
-        this.showKeyboard = true;
     },
 
     hide: function () {
         this.actor.hide();
         this._current_page.hide();
-        this.showKeyboard = false;
     }
 };
 
