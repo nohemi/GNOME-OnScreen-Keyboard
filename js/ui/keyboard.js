@@ -187,7 +187,7 @@ Keyboard.prototype = {
         this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChanged));
 
         this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
-        global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
+        Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                            visibleInFullscreen: true,
@@ -219,7 +219,7 @@ Keyboard.prototype = {
     },
 
     _reposition: function () {
-        let primary = global.get_primary_monitor();
+        let primary = Main.layoutManager.primaryMonitor;
         this.actor.x = primary.x;
         this.actor.y = primary.y + primary.height - this.actor.height;
         this.actor.height = primary.height / 3;
@@ -260,7 +260,7 @@ Keyboard.prototype = {
     _addRows : function (keys, layout) {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
         let alignEnd = false;
-        let primary_monitor = global.get_primary_monitor();
+        let primary_monitor = Main.layoutManager.primaryMonitor;
         for (let i = 0; i < keys.length; ++i) {
             if (this._numOfHorizKeys == 0)
                 this._numOfHorizKeys = keys.length;
@@ -287,7 +287,6 @@ Keyboard.prototype = {
         let source = new KeyboardSource(this);
         Main.messageTray.add(source);
         this.hide();
-        Main.overview.relayout();
     },
 
     _loadRows : function (level, layout) {
@@ -376,7 +375,6 @@ KeyboardSource.prototype = {
 
     open: function() {
         this._keyboard.show();
-        Main.overview.relayout();
         this.destroy();
     }
 };
