@@ -16,7 +16,8 @@ const MessageTray = imports.ui.messageTray;
 const PopupMenu = imports.ui.popupMenu;
 
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
-const SHOW_KEYBOARD_KEY = 'show-keyboard';
+const SHOW_KEYBOARD = 'show-keyboard';
+const ENABLE_DRAGGABLE = 'enable-drag';
 // Key constants taken from Antler
 const PRETTY_KEYS = [
     { name: "BackSpace", label: "\u232b" },
@@ -197,8 +198,8 @@ Keyboard.prototype = {
     },
 
     _display: function () {
-        let showKeyboardKey = this._keyboardSettings.get_boolean(SHOW_KEYBOARD_KEY);
-        if (showKeyboardKey) {
+        let showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
+        if (showKeyboard) {
             this.show();
         } else {
             this.hide();
