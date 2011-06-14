@@ -14,7 +14,6 @@ const DND = imports.ui.dnd;
 const Lightbox = imports.ui.lightbox;
 const Main = imports.ui.main;
 const Overview = imports.ui.overview;
-const Panel = imports.ui.panel;
 const Tweener = imports.ui.tweener;
 
 const FOCUS_ANIMATION_TIME = 0.15;
@@ -225,11 +224,11 @@ WindowClone.prototype = {
         let [width, height] = this.actor.get_transformed_size();
 
         let monitorIndex = this.metaWindow.get_monitor();
-        let availArea = Main.layoutManager.monitors[monitorIndex];
-        if (monitorIndex == Main.layoutManager.primaryIndex) {
-            availArea.y += Main.panel.actor.height;
-            availArea.height -= Main.panel.actor.height;
-        }
+        let availArea;
+        if (monitorIndex == Main.layoutManager.primaryIndex)
+            availArea = Main.layoutManager.overviewContentArea;
+        else
+            availArea = Main.layoutManager.monitors[monitorIndex];
 
         this.actor.x = _clamp(this.actor.x, availArea.x, availArea.x + availArea.width - width);
         this.actor.y = _clamp(this.actor.y, availArea.y, availArea.y + availArea.height - height);
@@ -593,7 +592,6 @@ Workspace.prototype = {
         this._height = 0;
 
         this.monitorIndex = monitorIndex;
-        this._monitor = Main.layoutManager.monitors[this.monitorIndex];
         this._windowOverlaysGroup = new Clutter.Group();
         // Without this the drop area will be overlapped.
         this._windowOverlaysGroup.set_size(0, 0);
