@@ -183,16 +183,23 @@ Keyboard.prototype = {
         this._verticalSpacing = 10;
         this._padding = 10;
 
-        this._addKeys();
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._onSettingsChanged));
+        this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
+        this._addKeys();
 
         this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         global.screen.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
-        Main.chrome.addActor(this.actor, { visibleInOverview: true,
-                                           visibleInFullscreen: true,
-                                           affectsStruts: true });
+        if (this._draggable) {
+            Main.chrome.addActor(this.actor, { visibleInOverview: true,
+                                               visibleInFullscreen: true,
+                                               affectsStruts: false });
+        } else {
+            Main.chrome.addActor(this.actor, { visibleInOverview: true,
+                                               visibleInFullscreen: true,
+                                               affectsStruts: true });
+        }
         this._reposition();
         this._display();
     },
@@ -270,6 +277,8 @@ Keyboard.prototype = {
                              - 2 * this._padding)/ this._numOfHorizKeys * key.width;
             let key_height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
                               - 2 * this._padding) / this._numOfVertKeys;
+            if (this._draggable)
+                key_width = key_height * key.width;
             let button = new Key(key, key_width, key_height);
             keyboard_row.add(button.actor);
             if (key.name == 'Return')
