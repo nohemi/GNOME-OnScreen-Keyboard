@@ -331,14 +331,8 @@ Keyboard.prototype = {
     },
 
     hide: function () {
-        let active_group_name = this._keyboard.active_group;
-        let group = this._keyboard.get_group(active_group_name);
-        let layers = this._groups[active_group_name];
-        for (let i = 0; i < group.get_levels().length; ++i) {
-            let lname = group.get_levels()[i];
-            layers[lname].hide();
-        }
         this.actor.hide();
+        this._current_page.hide();
         this.showKeyboard = false;
     }
 };
