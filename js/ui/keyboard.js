@@ -204,6 +204,7 @@ function Keyboard() {
 Keyboard.prototype = {
     _init: function () {
         DBus.session.exportObject('/org/gnome/Caribou/Keyboard', this);
+        DBus.session.acquire_name('org.gnome.Caribou.Keyboard', 0, null, null);
 
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
 
