@@ -196,7 +196,7 @@ Keyboard.prototype = {
 
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
 
-        this._keyboard = new Caribou.KeyboardModel();
+        this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'touch' });
         this.showKeyboard = true;
 
         this._groups = {};
@@ -311,7 +311,7 @@ Keyboard.prototype = {
             if (key.name == 'Return')
                 alignEnd = true;
             if (key.name == "Caribou_Prefs")
-                key.connect('key-clicked', Lang.bind(this, this._onPrefsClick));
+                key.connect('key-released', Lang.bind(this, this._onPrefsClick));
         }
         if (alignEnd) {
             layout.add(keyboard_row, { x_align: St.Align.END, x_fill: false });
