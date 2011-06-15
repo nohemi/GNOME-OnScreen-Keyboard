@@ -116,6 +116,7 @@ Key.prototype = {
         button.width = this._width;
         button.key_width = this._key.width;
         button.height = this._height;
+        button.draggable = false;
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
 
@@ -139,8 +140,10 @@ Key.prototype = {
             let extended_key = this._extended_keys[i];
             let label = this._getUnichar(extended_key);
             let key = new St.Button({ label: label, style_class: 'keyboard-key' });
+            key.extended_key = extended_key;
             key.width = this._width;
             key.height = this._height;
+            key.draggable = false;
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             this._extended_keyboard.add(key);
@@ -149,8 +152,14 @@ Key.prototype = {
     },
 
     _onEventCapture: function (actor, event) {
-        if (event.type() == Clutter.EventType.BUTTON_PRESS) {
-            if (this._extended_keyboard.contains(event.get_source())) {
+        let source = event.get_source();
+        if (event.type() == Clutter.EventType.BUTTON_PRESS ||
+            (event.type() == Clutter.EventType.BUTTON_RELEASE && source.draggable)) {
+            if (this._extended_keyboard.contains(source)) {
+                if (source.draggable) {
+                    source.extended_key.press();
+                    source.extended_key.release();
+                }
                 this._ungrab();
                 return false;
             }
@@ -209,28 +218,22 @@ Keyboard.prototype = {
 
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._display));
-        this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
         this._addKeys();
 
         this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
-        if (this._draggable) {
-            Main.chrome.addActor(this.actor, { visibleInOverview: true,
-                                               visibleInFullscreen: true,
-                                               affectsStruts: false });
-        } else {
-            Main.chrome.addActor(this.actor, { visibleInOverview: true,
+        Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                                visibleInFullscreen: true,
                                                affectsStruts: true });
-        }
         this._reposition();
         this._display();
     },
 
     _display: function () {
-        let showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
-        if (showKeyboard) {
+        this._showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
+        this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
+        if (this._showKeyboard) {
             this.show();
         } else {
             this.hide();
@@ -287,7 +290,7 @@ Keyboard.prototype = {
             if (this._numOfHorizKeys == 0)
                 this._numOfHorizKeys = keys.length;
             let key = keys[i];
-            let button = new Key(key, 0, 0);
+            let button = new Key(key, 0, 0, this._draggable);
             keyboard_row.add(button.actor);
             if (key.name == 'Return')
                 alignEnd = true;
@@ -337,14 +340,16 @@ Keyboard.prototype = {
                              - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
                 child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
                               - 2 * this._padding) / this._numOfVertKeys;
-               if (child.boxPointer) {
-                   let extended_keys = child.boxPointer.bin.get_children()[0];
-                   for (let k = 0; k < extended_keys.get_children().length; ++k) {
-                       let extended_key = extended_keys.get_children()[k];
-                       extended_key.width = child.width;
-                       extended_key.height = child.height;
-                   }
-               }
+                child.draggable = this._draggable;
+                if (child.boxPointer) {
+                    let extended_keys = child.boxPointer.bin.get_children()[0];
+                    for (let k = 0; k < extended_keys.get_children().length; ++k) {
+                        let extended_key = extended_keys.get_children()[k];
+                        extended_key.width = child.width;
+                        extended_key.height = child.height;
+                        extended_key.draggable = this._draggable;
+                    }
+                }
             }
         }
     },
