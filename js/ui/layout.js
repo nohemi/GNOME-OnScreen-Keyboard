@@ -79,7 +79,6 @@ LayoutManager.prototype = {
         let primaryContentArea = new Meta.Rectangle(this.primaryMonitor);
         primaryContentArea.y += this._panelHeight;
         primaryContentArea.height -= this._panelHeight;
-        primaryContentArea.height -= this._keyboardHeight;
         if (!this.primaryContentArea.equal(primaryContentArea)) {
             this.primaryContentArea = primaryContentArea;
             changed = true;

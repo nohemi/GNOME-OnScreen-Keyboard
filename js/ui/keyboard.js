@@ -227,7 +227,7 @@ Keyboard.prototype = {
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                                visibleInFullscreen: true,
-                                               affectsStruts: true });
+                                               affectsStruts: false });
         this._reposition();
         this._display();
     },
