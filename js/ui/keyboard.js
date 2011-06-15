@@ -2,6 +2,7 @@
 
 const Caribou = imports.gi.Caribou;
 const Clutter = imports.gi.Clutter;
+const DBus = imports.dbus;
 const Gdk = imports.gi.Gdk;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
@@ -31,6 +32,29 @@ const PRETTY_KEYS = [
     { name: "Caribou_Symbols_More", label: "{#*" },
     { name: "Caribou_Alpha", label: "Abc" }
 ];
+
+const CaribouKeyboardIface = {
+    name: 'org.gnome.Caribou.Keyboard',
+    methods:    [ { name: 'Show',
+                    inSignature: '',
+                    outSignature: ''
+                  },
+                  { name: 'Hide',
+                    inSignature: '',
+                    outSignature: ''
+                  },
+                  { name: 'SetCursorLocation',
+                    inSignature: 'iiii',
+                    outSignature: ''
+                  },
+                  { name: 'SetEntryLocation',
+                    inSignature: 'iiii',
+                    outSignature: ''
+                  } ],
+    properties: [ { name: 'Name',
+                    signature: 's',
+                    access: 'read' } ]
+};
 
 function Key() {
     this._init.apply(this, arguments);
@@ -168,6 +192,8 @@ function Keyboard() {
 
 Keyboard.prototype = {
     _init: function () {
+        DBus.session.exportObject('/org/gnome/Caribou/Keyboard', this);
+
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
 
         this._keyboard = new Caribou.KeyboardModel();
@@ -344,8 +370,30 @@ Keyboard.prototype = {
         this.actor.hide();
         this._current_page.hide();
         this.showKeyboard = false;
+    },
+
+    // D-Bus methods
+    Show: function() {
+        this.show();
+    },
+
+    Hide: function() {
+        this.hide();
+    },
+
+    SetCursorLocation: function(x, y, w, h) {
+        // FIXME: if tracking cursor, move window accordingly
+    },
+
+    SetEntryLocation: function(x, y, w, h) {
+        // FIXME: if tracking entry, move window accordingly
+    },
+
+    get Name() {
+        return 'gnome-shell';
     }
 };
+DBus.conformExport(Keyboard.prototype, CaribouKeyboardIface);
 
 function KeyboardSource() {
     this._init.apply(this, arguments);
