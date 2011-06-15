@@ -358,10 +358,12 @@ Keyboard.prototype = {
 
     _onLevelChanged: function () {
         this._setActiveLayer();
+        this._redraw();
     },
 
     _onGroupChanged: function () {
         this._setActiveLayer();
+        this._redraw();
     },
 
     _setActiveLayer: function () {
@@ -375,7 +377,7 @@ Keyboard.prototype = {
         }
 
         this._current_page = layers[active_level];
-        layers[active_level].show();
+        this._current_page.show();
     },
 
     show: function () {
