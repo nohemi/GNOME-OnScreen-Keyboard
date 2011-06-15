@@ -287,15 +287,17 @@ Keyboard.prototype = {
         let alignEnd = false;
         let primary_monitor = Main.layoutManager.primaryMonitor;
         for (let i = 0; i < keys.length; ++i) {
-            if (this._numOfHorizKeys == 0)
-                this._numOfHorizKeys = keys.length;
-            let key = keys[i];
-            let button = new Key(key, 0, 0, this._draggable);
-            keyboard_row.add(button.actor);
-            if (key.name == 'Return')
-                alignEnd = true;
-            if (key.name == "Caribou_Prefs")
-                key.connect('key-released', Lang.bind(this, this._onPrefsClick));
+            for (let j = 0; j < keys[i].get_children().length; ++j) {
+                if (this._numOfHorizKeys == 0)
+                    this._numOfHorizKeys = keys[i].get_children().length;
+                let key = keys[i].get_children()[j];
+                let button = new Key(key, 0, 0, this._draggable);
+                keyboard_row.add(button.actor);
+                if (key.name == 'Return')
+                    alignEnd = true;
+                if (key.name == "Caribou_Prefs")
+                    key.connect('key-released', Lang.bind(this, this._onPrefsClick));
+            }
         }
         if (alignEnd) {
             layout.add(keyboard_row, { x_align: St.Align.END, x_fill: false });
@@ -316,7 +318,7 @@ Keyboard.prototype = {
             let row = rows[i];
             if (this._numOfVertKeys == 0)
                 this._numOfVertKeys = rows.length;
-            this._addRows(row.get_keys(),layout);
+            this._addRows(row.get_columns(),layout);
         }
 
     },
