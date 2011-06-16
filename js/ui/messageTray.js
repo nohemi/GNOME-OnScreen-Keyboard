@@ -1865,8 +1865,11 @@ MessageTray.prototype = {
 
     _showTray: function() {
         let monitor = Main.layoutManager.bottomMonitor;
+        let trayY = monitor.y + monitor.height - this.actor.height;
+        if (Main.keyboard.actor.visible)
+            trayY -= Main.keyboard.actor.height;
         this._tween(this.actor, '_trayState', State.SHOWN,
-                    { y: monitor.y + monitor.height - this.actor.height,
+                    { y: trayY,
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
@@ -1874,8 +1877,11 @@ MessageTray.prototype = {
 
     _hideTray: function() {
         let monitor = Main.layoutManager.bottomMonitor;
+        let trayY = monitor.y + monitor.height -1;
+        if (Main.keyboard.actor.visible)
+            trayY -= Main.keyboard.actor.height;
         this._tween(this.actor, '_trayState', State.HIDDEN,
-                    { y: monitor.y + monitor.height - 1,
+                    { y: trayY,
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
