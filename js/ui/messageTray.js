@@ -1835,9 +1835,9 @@ MessageTray.prototype = {
         let trayShouldBeVisible = (!notificationsDone ||
                                    this._summaryState == State.SHOWING ||
                                    this._summaryState == State.SHOWN);
-        if (!trayIsVisible && trayShouldBeVisible)
+        if (!trayIsVisible && trayShouldBeVisible && Main.keyboard.showTray)
             this._showTray();
-        else if (trayIsVisible && !trayShouldBeVisible)
+        else if (trayIsVisible && !trayShouldBeVisible || !Main.keyboard.showTray)
             this._hideTray();
     },
 
