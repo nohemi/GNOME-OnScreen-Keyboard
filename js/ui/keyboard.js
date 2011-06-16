@@ -227,6 +227,7 @@ Keyboard.prototype = {
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                                visibleInFullscreen: true,
                                                affectsStruts: false });
+        this.showTray = true;
         this._reposition();
         this._display();
     },
@@ -293,10 +294,10 @@ Keyboard.prototype = {
     },
 
     _onTrayClicked: function () {
-        if (!Main.messageTray.actor.visible)
-            Main.messageTray.actor.show();
-        else
-            Main.messageTray.actor.hide();
+        // Toggle effect tray icon has on message tray
+        this.showTray = !this.showTray;
+        Main.messageTray._updateState();
+
     },
 
     _addRows : function (keys, layout) {
@@ -410,6 +411,7 @@ Keyboard.prototype = {
     hide: function () {
         this.actor.hide();
         this._current_page.hide();
+        this.showTray = true;
     },
 
     // D-Bus methods
