@@ -284,6 +284,22 @@ Keyboard.prototype = {
         this._setActiveLayer();
     },
 
+    _getTrayIcon: function () {
+        let trayButton = new St.Button ({ label: "tray", style_class: 'keyboard-key' });
+        trayButton.width = 0;
+        trayButton.height = 0;
+        trayButton.key_width = 1;
+        trayButton.connect('button-press-event', Lang.bind(this, this._onTrayClicked));
+        return trayButton;
+    },
+
+    _onTrayClicked: function () {
+        if (!Main.messageTray.actor.visible)
+            Main.messageTray.actor.show();
+        else
+            Main.messageTray.actor.hide();
+    },
+
     _addRows : function (keys, layout) {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
         let alignEnd = false;
@@ -293,12 +309,16 @@ Keyboard.prototype = {
                 if (this._numOfHorizKeys == 0)
                     this._numOfHorizKeys = keys[i].get_children().length;
                 let key = keys[i].get_children()[j];
-                let button = new Key(key, 0, 0, this._draggable);
+                let button = new Key(key, 0, 0);
                 keyboard_row.add(button.actor);
                 if (key.name == 'Return')
                     alignEnd = true;
-                if (key.name == "Caribou_Prefs")
+                if (key.name == "Caribou_Prefs") {
                     key.connect('key-released', Lang.bind(this, this._onPrefsClick));
+
+                    // Add new key for hiding message tray
+                    keyboard_row.add(this._getTrayIcon());
+                }
             }
         }
         if (alignEnd) {
