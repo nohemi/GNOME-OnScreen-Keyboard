@@ -206,7 +206,7 @@ Keyboard.prototype = {
         DBus.session.exportObject('/org/gnome/Caribou/Keyboard', this);
         DBus.session.acquire_name('org.gnome.Caribou.Keyboard', 0, null, null);
 
-        this.actor = new St.BoxLayout({ name: 'keyboard', vertical: 'false' });
+        this.actor = new St.BoxLayout({ name: 'keyboard', vertical: false, reactive: true });
 
         this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'touch' });
 
@@ -222,8 +222,13 @@ Keyboard.prototype = {
         this._addKeys();
 
         this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
+
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
+
+        this.actor.connect('button-press-event', Lang.bind(this, this._startDragging));
+        this._dragging = false;
+        this.floating = true;
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                                visibleInFullscreen: true,
                                                affectsStruts: false });
@@ -240,6 +245,52 @@ Keyboard.prototype = {
         } else {
             this.hide();
         }
+    },
+
+    _startDragging: function (actor, event) {
+        if (this._dragging) // don't allow two drags at the same time
+            return;
+        this._dragging = true;
+
+        Clutter.grab_pointer(this.actor);
+        this._releaseId = this.actor.connect('button-release-event', Lang.bind(this, this._endDragging));
+        this._motionId = this.actor.connect('motion-event', Lang.bind(this, this._motionEvent));
+    },
+
+    _endDragging: function () {
+        if (this._dragging) {
+            this.actor.disconnect(this._releaseId);
+            this.actor.disconnect(this._motionId);
+
+            Clutter.ungrab_pointer();
+            global.unset_cursor();
+            this._dragging = false;
+        }
+        return true;
+    },
+
+    _motionEvent: function(actor, event) {
+        let absX, absY;
+        [absX, absY] = event.get_coords();
+        global.set_cursor(Shell.Cursor.DND_IN_DRAG);
+        this._moveHandle(absX, absY);
+        return true;
+    },
+
+    _moveHandle: function (stageX, stageY) {
+        let [sourceX, sourceY] = this.actor.get_transformed_position();
+
+        let x, y;
+        if (stageX > sourceX && stageX <= sourceX + this.actor.width &&
+            stageY > sourceY && stageY <= sourceY + this.actor.height) {
+            x = sourceX;
+            y = sourceY;
+        } else {
+            x = stageX - this.actor.width / 2;
+            y = stageY - this.actor.height / 2;
+        }
+        this.actor.set_position(x,y);
+
     },
 
     _onStyleChanged: function (actor) {
@@ -259,7 +310,7 @@ Keyboard.prototype = {
     },
 
     _queueReposition: function () {
-        Meta.later_add(Meta.LaterType.BEFORE_REDRAW, Lang.bind(this, function () { this._reposition(); }));
+     //   Meta.later_add(Meta.LaterType.BEFORE_REDRAW, Lang.bind(this, function () { this._reposition(); }));
     },
 
     _addKeys: function () {

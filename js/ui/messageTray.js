@@ -1866,7 +1866,7 @@ MessageTray.prototype = {
     _showTray: function() {
         let monitor = Main.layoutManager.bottomMonitor;
         let trayY = monitor.y + monitor.height - this.actor.height;
-        if (Main.keyboard.actor.visible)
+        if (Main.keyboard.actor.visible && !Main.keyboard.floating)
             trayY -= Main.keyboard.actor.height;
         this._tween(this.actor, '_trayState', State.SHOWN,
                     { y: trayY,
@@ -1878,7 +1878,7 @@ MessageTray.prototype = {
     _hideTray: function() {
         let monitor = Main.layoutManager.bottomMonitor;
         let trayY = monitor.y + monitor.height -1;
-        if (Main.keyboard.actor.visible)
+        if (Main.keyboard.actor.visible && !Main.keyboard.floating)
             trayY -= Main.keyboard.actor.height;
         this._tween(this.actor, '_trayState', State.HIDDEN,
                     { y: trayY,
