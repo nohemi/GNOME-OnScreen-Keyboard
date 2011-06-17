@@ -92,6 +92,13 @@
         If true, enable keyboard dragging.
       </_description>
     </key>
+    <key name="enable-float" type="b">
+      <default>false</default>
+      <_summary>Enable floating keyboard</_summary>
+      <_description>
+        If true, enable floating keyboard.
+      </_description>
+    </key>
   </schema>
 
   <schema id="org.gnome.shell.clock" path="/org/gnome/shell/clock/"

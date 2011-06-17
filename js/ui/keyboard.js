@@ -19,6 +19,7 @@ const PopupMenu = imports.ui.popupMenu;
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD = 'show-keyboard';
 const ENABLE_DRAGGABLE = 'enable-drag';
+const ENABLE_FLOAT = 'enable-float';
 // Key constants taken from Antler
 const PRETTY_KEYS = [
     { name: "BackSpace", label: "\u232b" },
@@ -227,9 +228,6 @@ Keyboard.prototype = {
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
 
-        this.actor.connect('button-press-event', Lang.bind(this, this._startDragging));
-        this._dragging = false;
-        this.floating = true;
         Main.chrome.addActor(this.actor, { visibleInOverview: true,
                                                visibleInFullscreen: true,
                                                affectsStruts: false });
@@ -241,6 +239,13 @@ Keyboard.prototype = {
     _display: function () {
         this._showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
         this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
+        this.floating = this._keyboardSettings.get_boolean(ENABLE_FLOAT);
+        if (this.floating) {
+             this._floatId = this.actor.connect('button-press-event', Lang.bind(this, this._startDragging));
+             this._dragging = false;
+        }
+        else
+            this.actor.disconnect(this._floatId);
         if (this._showKeyboard) {
             this.show();
         } else {
@@ -409,6 +414,10 @@ Keyboard.prototype = {
                              - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
                 child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
                               - 2 * this._padding) / this._numOfVertKeys;
+                if (this.floating) {
+                    child.width = Math.min(child.width, child.height);
+                    child.height = child.width;
+                }
                 child.draggable = this._draggable;
                 if (child.boxPointer) {
                     let extended_keys = child.boxPointer.bin.get_children()[0];
