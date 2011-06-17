@@ -255,6 +255,7 @@ Keyboard.prototype = {
         Clutter.grab_pointer(this.actor);
         this._releaseId = this.actor.connect('button-release-event', Lang.bind(this, this._endDragging));
         this._motionId = this.actor.connect('motion-event', Lang.bind(this, this._motionEvent));
+        [this._dragStartX, this._dragStartY] = event.get_coords();
     },
 
     _endDragging: function () {
@@ -278,17 +279,9 @@ Keyboard.prototype = {
     },
 
     _moveHandle: function (stageX, stageY) {
-        let [sourceX, sourceY] = this.actor.get_transformed_position();
-
         let x, y;
-        if (stageX > sourceX && stageX <= sourceX + this.actor.width &&
-            stageY > sourceY && stageY <= sourceY + this.actor.height) {
-            x = sourceX;
-            y = sourceY;
-        } else {
-            x = stageX - this.actor.width / 2;
-            y = stageY - this.actor.height / 2;
-        }
+        x = stageX - this._dragStartX;
+        y = stageY - this._dragStartY + this.actor.height * 2;
         this.actor.set_position(x,y);
 
     },
