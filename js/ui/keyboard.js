@@ -31,7 +31,9 @@ const PRETTY_KEYS = [
     { name: "Caribou_Emoticons", label: "\u263a" },
     { name: "Caribou_Symbols", label: "123" },
     { name: "Caribou_Symbols_More", label: "{#*" },
-    { name: "Caribou_Alpha", label: "Abc" }
+    { name: "Caribou_Alpha", label: "Abc" },
+    { name: "Tab", label: "Tab" },
+    { name: "Escape", label: "Esc" }
 ];
 
 const CaribouKeyboardIface = {
