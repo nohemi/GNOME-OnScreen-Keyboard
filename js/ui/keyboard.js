@@ -416,8 +416,8 @@ Keyboard.prototype = {
                 child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
                               - 2 * this._padding) / this._numOfVertKeys;
                 if (this.floating) {
-                    child.width = Math.min(child.width, child.height);
-                    child.height = child.width;
+                    child.height = Math.min(child.width, child.height);
+                    child.width = child.height * child.key_width;
                 }
                 child.draggable = this._draggable;
                 if (child.boxPointer) {
