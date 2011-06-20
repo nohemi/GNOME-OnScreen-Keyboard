@@ -218,6 +218,8 @@ Keyboard.prototype = {
         this._numOfHorizKeys = 0;
         this._numOfVertKeys = 0;
 
+        this._floatId = 0;
+
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._display));
         this._addKeys();
