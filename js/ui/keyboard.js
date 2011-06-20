@@ -356,7 +356,6 @@ Keyboard.prototype = {
 
     _addRows : function (keys, layout) {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
-        let alignEnd = false;
         let primary_monitor = Main.layoutManager.primaryMonitor;
         for (let i = 0; i < keys.length; ++i) {
             for (let j = 0; j < keys[i].get_children().length; ++j) {
@@ -364,9 +363,12 @@ Keyboard.prototype = {
                     this._numOfHorizKeys = keys[i].get_children().length;
                 let key = keys[i].get_children()[j];
                 let button = new Key(key, 0, 0);
+                if (key.margin_left > 0) {
+                    let separator = new St.Bin();
+                    separator.key_width = key.margin_left;
+                    keyboard_row.add(separator);
+                }
                 keyboard_row.add(button.actor);
-                if (key.name == 'Return')
-                    alignEnd = true;
                 if (key.name == "Caribou_Prefs") {
                     key.connect('key-released', Lang.bind(this, this._onPrefsClick));
 
@@ -375,11 +377,7 @@ Keyboard.prototype = {
                 }
             }
         }
-        if (alignEnd) {
-            layout.add(keyboard_row, { x_align: St.Align.END, x_fill: false });
-        } else {
-            layout.add(keyboard_row, { x_align: St.Align.START, x_fill: false });
-        }
+        layout.add(keyboard_row);
     },
 
     _onPrefsClick: function () {
