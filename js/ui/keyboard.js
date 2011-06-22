@@ -75,6 +75,9 @@ Key.prototype = {
         this._extended_keys = this._key.get_extended_keys();
         this._extended_keyboard = {};
 
+        if (this._key.name == "Control" || this._key.name == "Alt")
+            this._key.latch = true;
+
         if (this._extended_keys.length > 0) {
             this._grabbed = false;
             this._eventCaptureId = 0;
