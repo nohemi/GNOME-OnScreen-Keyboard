@@ -1694,6 +1694,7 @@ StTooltip StLabel {
     border: 3px solid white;
 }
 
+.keyboard-key:checked,
 .keyboard-key:active {
     background: #808080;
 }

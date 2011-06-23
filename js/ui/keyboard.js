@@ -78,6 +78,11 @@ Key.prototype = {
         if (this._key.name == "Control" || this._key.name == "Alt")
             this._key.latch = true;
 
+        this._key.connect('key-pressed', Lang.bind(this, function ()
+                                                   { this.actor.checked = true }));
+        this._key.connect('key-released', Lang.bind(this, function ()
+                                                    { this.actor.checked = false; }));
+
         if (this._extended_keys.length > 0) {
             this._grabbed = false;
             this._eventCaptureId = 0;
@@ -189,7 +194,6 @@ Key.prototype = {
             this._boxPointer.actor.raise_top();
             this._boxPointer.setPosition(this.actor, 5, 0.5);
             this._boxPointer.show(true);
-            this.actor.set_hover(false);
             if (!this._grabbed) {
                  Main.pushModal(this.actor);
                  this._eventCaptureId = global.stage.connect('captured-event', Lang.bind(this, this._onEventCapture));
