@@ -467,6 +467,7 @@ Keyboard.prototype = {
 
     show: function () {
         this._redraw();
+        this._reposition();
         this.actor.show();
         this._current_page.show();
     },
