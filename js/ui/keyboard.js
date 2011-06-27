@@ -33,7 +33,8 @@ const PRETTY_KEYS = [
     { name: "Caribou_Symbols_More", label: "{#*" },
     { name: "Caribou_Alpha", label: "Abc" },
     { name: "Tab", label: "Tab" },
-    { name: "Escape", label: "Esc" }
+    { name: "Escape", label: "Esc" },
+    { name: "Control", label: "Ctrl" }
 ];
 
 const CaribouKeyboardIface = {
@@ -218,7 +219,7 @@ Keyboard.prototype = {
 
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: false, reactive: true });
 
-        this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'touch' });
+        this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'fullscale' });
         this.showKeyboard = true;
 
         this._groups = {};
