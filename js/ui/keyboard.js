@@ -358,7 +358,7 @@ Keyboard.prototype = {
     _onTrayClicked: function () {
         // Toggle effect tray icon has on message tray
         this.showTray = !this.showTray;
-        Main.messageTray._updateState();
+        Main.messageTray.updateState();
 
     },
 
