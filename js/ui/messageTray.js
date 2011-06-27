@@ -1267,7 +1267,7 @@ MessageTray.prototype = {
                     this._unsetClickedSummaryItem();
                     this._unlock();
                 } else {
-                    this._updateState();
+                    this.updateState();
                 }
             }));
         Main.overview.connect('hiding', Lang.bind(this,
@@ -1277,7 +1277,7 @@ MessageTray.prototype = {
                     this._unsetClickedSummaryItem();
                     this._unlock();
                 } else {
-                    this._updateState();
+                    this.updateState();
                 }
             }));
 
@@ -1374,8 +1374,8 @@ MessageTray.prototype = {
         // We need to display the newly-added summary item, but if the
         // caller is about to post a notification, we want to show that
         // *first* and not show the summary item until after it hides.
-        // So postpone calling _updateState() a tiny bit.
-        Meta.later_add(Meta.LaterType.BEFORE_REDRAW, Lang.bind(this, function() { this._updateState(); return false; }));
+        // So postpone calling updateState() a tiny bit.
+        Meta.later_add(Meta.LaterType.BEFORE_REDRAW, Lang.bind(this, function() { this.updateState(); return false; }));
     },
 
     _onSourceDestroy: function(source) {
@@ -1429,14 +1429,14 @@ MessageTray.prototype = {
         summaryItemToRemove.actor.destroy();
 
         if (needUpdate);
-            this._updateState();
+            this.updateState();
     },
 
     _onNotificationDestroy: function(notification) {
         if (this._notification == notification && (this._notificationState == State.SHOWN || this._notificationState == State.SHOWING)) {
             this._updateNotificationTimeout(0);
             this._notificationRemoved = true;
-            this._updateState();
+            this.updateState();
             return;
         }
 
@@ -1455,7 +1455,7 @@ MessageTray.prototype = {
             return;
         this._locked = false;
         this._pointerInTray = this.actor.hover && !this._summaryBoxPointer.bin.hover;
-        this._updateState();
+        this.updateState();
     },
 
     _onNotify: function(source, notification) {
@@ -1488,7 +1488,7 @@ MessageTray.prototype = {
                 return (notification2.urgency - notification1.urgency);
             });
         }
-        this._updateState();
+        this.updateState();
     },
 
     _onSummaryItemHoverChanged: function(summaryItem) {
@@ -1619,12 +1619,12 @@ MessageTray.prototype = {
             this._unsetClickedSummaryItem();
         }
 
-        this._updateState();
+        this.updateState();
     },
 
     _onSummaryHoverChanged: function() {
         this._pointerInSummary = this._summary.hover;
-        this._updateState();
+        this.updateState();
     },
 
     _onTrayHoverChanged: function() {
@@ -1672,7 +1672,7 @@ MessageTray.prototype = {
                 }
             }
             this._pointerInTray = true;
-            this._updateState();
+            this.updateState();
         } else {
             // We record the position of the mouse the moment it leaves the tray. These coordinates are used in
             // this._onTrayLeftTimeout() to determine if the mouse has moved far enough during the initial timeout for us
@@ -1709,7 +1709,7 @@ MessageTray.prototype = {
             this._busy = false;
         }
 
-        this._updateState();
+        this.updateState();
     },
 
     _onTrayLeftTimeout: function() {
@@ -1730,7 +1730,7 @@ MessageTray.prototype = {
             this._pointerInTray = false;
             this._pointerInSummary = false;
             this._updateNotificationTimeout(0);
-            this._updateState();
+            this.updateState();
         }
         return false;
     },
@@ -1740,15 +1740,15 @@ MessageTray.prototype = {
         this._pointerInTray = false;
         this._pointerInSummary = false;
         this._updateNotificationTimeout(0);
-        this._updateState();
+        this.updateState();
     },
 
     // All of the logic for what happens when occurs here; the various
     // event handlers merely update variables such as
     // 'this._pointerInTray', 'this._summaryState', etc, and
-    // _updateState() figures out what (if anything) needs to be done
+    // updateState() figures out what (if anything) needs to be done
     // at the present time.
-    _updateState: function() {
+    updateState: function() {
         // Notifications
         let notificationUrgent = this._notificationQueue.length > 0 && this._notificationQueue[0].urgency == Urgency.CRITICAL;
         let notificationsPending = this._notificationQueue.length > 0 && (!this._busy || notificationUrgent);
@@ -1860,7 +1860,7 @@ MessageTray.prototype = {
         this[statevar] = value;
         if (onComplete)
             onComplete.apply(onCompleteScope, onCompleteParams);
-        this._updateState();
+        this.updateState();
     },
 
     _showTray: function() {
@@ -1978,7 +1978,7 @@ MessageTray.prototype = {
             this._updateNotificationTimeout(1000);
         } else {
             this._notificationTimeoutId = 0;
-            this._updateState();
+            this.updateState();
         }
 
         return false;
@@ -2075,7 +2075,7 @@ MessageTray.prototype = {
 
     _summaryTimeout: function() {
         this._summaryTimeoutId = 0;
-        this._updateState();
+        this.updateState();
         return false;
     },
 
@@ -2197,7 +2197,7 @@ MessageTray.prototype = {
         }
 
         if (this._clickedSummaryItem)
-            this._updateState();
+            this.updateState();
     }
 };
 
