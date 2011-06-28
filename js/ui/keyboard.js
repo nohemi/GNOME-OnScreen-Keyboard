@@ -97,9 +97,8 @@ Key.prototype = {
             this._boxPointer.actor.add_style_class_name('keyboard-subkeys');
             this._getExtendedKeys();
             this._boxPointer.actor.hide();
-            Main.chrome.addActor(this._boxPointer.actor, { visibleInOverview: true,
-                                                     visibleInFullscreen: true,
-                                                     affectsStruts: false });
+            Main.chrome.addActor(this._boxPointer.actor, { visibleInFullscreen: true,
+                                                           affectsStruts: false });
         }
     },
 
@@ -219,7 +218,7 @@ Keyboard.prototype = {
 
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: false, reactive: true });
 
-        this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'fullscale' });
+        this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'touch' });
 
         this._groups = {};
         this._current_page = null;
@@ -239,9 +238,8 @@ Keyboard.prototype = {
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
 
-        Main.chrome.addActor(this.actor, { visibleInOverview: true,
-                                               visibleInFullscreen: true,
-                                               affectsStruts: false });
+        Main.chrome.addActor(this.actor, { visibleInFullscreen: true,
+                                           affectsStruts: false });
         this.showTray = true;
         this._reposition();
         this._display();
