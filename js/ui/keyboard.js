@@ -466,7 +466,7 @@ Keyboard.prototype = {
 
     show: function () {
         this._redraw();
-        this._reposition();
+        //this._reposition();
         this.actor.show();
         this._current_page.show();
     },
@@ -475,6 +475,14 @@ Keyboard.prototype = {
         this.actor.hide();
         this._current_page.hide();
         this.showTray = true;
+    },
+
+    // Window placement method
+    _updatePosition: function (x, y) {
+       x -= this.actor.width/2;
+       y += this.actor.height/2;
+
+       this.actor.set_position(x, y);
     },
 
     // D-Bus methods
@@ -487,11 +495,11 @@ Keyboard.prototype = {
     },
 
     SetCursorLocation: function(x, y, w, h) {
-        // FIXME: if tracking cursor, move window accordingly
+        this._updatePosition(x, y);
     },
 
     SetEntryLocation: function(x, y, w, h) {
-        // FIXME: if tracking entry, move window accordingly
+        this._updatePosition(x, y);
     },
 
     get Name() {
