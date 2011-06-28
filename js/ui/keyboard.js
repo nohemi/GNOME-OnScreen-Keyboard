@@ -220,7 +220,6 @@ Keyboard.prototype = {
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: false, reactive: true });
 
         this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'fullscale' });
-        this.showKeyboard = true;
 
         this._groups = {};
         this._current_page = null;
@@ -477,7 +476,6 @@ Keyboard.prototype = {
     hide: function () {
         this.actor.hide();
         this._current_page.hide();
-        this.showKeyboard = false;
         this.showTray = true;
     },
 

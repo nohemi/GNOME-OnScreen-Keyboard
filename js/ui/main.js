@@ -210,6 +210,7 @@ function start() {
 
     global.screen.connect('window-entered-monitor', _windowEnteredMonitor);
     global.screen.connect('window-left-monitor', _windowLeftMonitor);
+    global.screen.connect('restacked', _windowsRestacked);
 
     _nWorkspacesChanged();
 }
@@ -312,6 +313,13 @@ function _windowEnteredMonitor(metaScreen, monitorIndex, metaWin) {
         _queueCheckWorkspaces();
 }
 
+function _windowsRestacked() {
+    // Figure out where the pointer is in case we lost track of
+    // it during a grab. (In particular, if a trayicon popup menu
+    // is dismissed, see if we need to close the message tray.)
+    global.sync_pointer();
+}
+
 function _queueCheckWorkspaces() {
     if (_checkWorkspacesId == 0)
         _checkWorkspacesId = Meta.later_add(Meta.LaterType.BEFORE_REDRAW, _checkWorkspaces);
@@ -395,12 +403,21 @@ function setThemeStylesheet(cssStylesheet)
  */
 function loadTheme() {
     let themeContext = St.ThemeContext.get_for_stage (global.stage);
+    let previousTheme = themeContext.get_theme();
 
     let cssStylesheet = _defaultCssStylesheet;
     if (_cssStylesheet != null)
         cssStylesheet = _cssStylesheet;
 
     let theme = new St.Theme ({ application_stylesheet: cssStylesheet });
+
+    if (previousTheme) {
+        let customStylesheets = previousTheme.get_custom_stylesheets();
+
+        for (let i = 0; i < customStylesheets.length; i++)
+            theme.load_stylesheet(customStylesheets[i]);
+    }
+
     themeContext.set_theme (theme);
 }
 

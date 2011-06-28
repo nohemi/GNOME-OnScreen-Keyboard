@@ -90,6 +90,7 @@ Indicator.prototype = {
         this._updateFullMenu();
 
         this.menu.addAction(_("Bluetooth Settings"), function() {
+            Main.overview.hide()
             let app = Shell.AppSystem.get_default().get_app('bluetooth-properties.desktop');
             app.activate(-1);
         });
@@ -108,7 +109,11 @@ Indicator.prototype = {
                          current_state != GnomeBluetoothApplet.KillswitchState.HARD_BLOCKED;
 
         this._killswitch.setToggleState(on);
-        this._killswitch.actor.reactive = can_toggle;
+        if (can_toggle)
+            this._killswitch.setStatus(null);
+        else
+            /* TRANSLATORS: this means that bluetooth was disabled by hardware rfkill */
+            this._killswitch.setStatus(_("hardware disabled"));
 
         if (has_adapter)
             this.actor.show();
@@ -210,14 +215,15 @@ Indicator.prototype = {
         if (device.can_connect) {
             item._connected = device.connected;
             item._connectedMenuitem = new PopupMenu.PopupSwitchMenuItem(_("Connection"), device.connected);
-
             item._connectedMenuitem.connect('toggled', Lang.bind(this, function() {
                 if (item._connected > ConnectionState.CONNECTED) {
                     // operation already in progress, revert
+                    // (should not happen anyway)
                     menuitem.setToggleState(menuitem.state);
                 }
                 if (item._connected) {
                     item._connected = ConnectionState.DISCONNECTING;
+                    menuitem.setStatus(_("disconnecting..."));
                     this._applet.disconnect_device(item._device.device_path, function(applet, success) {
                         if (success) { // apply
                             item._connected = ConnectionState.DISCONNECTED;
@@ -226,9 +232,11 @@ Indicator.prototype = {
                             item._connected = ConnectionState.CONNECTED;
                             menuitem.setToggleState(true);
                         }
+                        menuitem.setStatus(null);
                     });
                 } else {
                     item._connected = ConnectionState.CONNECTING;
+                    menuitem.setStatus(_("connecting..."));
                     this._applet.connect_device(item._device.device_path, function(applet, success) {
                         if (success) { // apply
                             item._connected = ConnectionState.CONNECTED;
@@ -237,6 +245,7 @@ Indicator.prototype = {
                             item._connected = ConnectionState.DISCONNECTED;
                             menuitem.setToggleState(false);
                         }
+                        menuitem.setStatus(null);
                     });
                 }
             }));

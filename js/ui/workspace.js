@@ -307,6 +307,21 @@ WindowClone.prototype = {
         this.emit('drag-begin');
     },
 
+    _getWorkspaceActor : function() {
+        let index = this.metaWindow.get_workspace().index();
+        return Main.overview.workspaces.getWorkspaceByIndex(index);
+    },
+
+    handleDragOver : function(source, actor, x, y, time) {
+        let workspace = this._getWorkspaceActor();
+        return workspace.handleDragOver(source, actor, x, y, time);
+    },
+
+    acceptDrop : function(source, actor, x, y, time) {
+        let workspace = this._getWorkspaceActor();
+        workspace.acceptDrop(source, actor, x, y, time);
+    },
+
     _onDragCancelled : function (draggable, time) {
         this.emit('drag-cancelled');
     },
@@ -631,6 +646,7 @@ Workspace.prototype = {
             function () {
                 this._dropRect.set_position(x, y);
                 this._dropRect.set_size(width, height);
+                this.positionWindows(WindowPositionFlags.ANIMATE);
                 return false;
             }));
 

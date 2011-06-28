@@ -49,6 +49,10 @@ WorkspacesView.prototype = {
         this._height = 0;
         this._x = 0;
         this._y = 0;
+        this._clipX = 0;
+        this._clipY = 0;
+        this._clipWidth = 0;
+        this._clipHeight = 0;
         this._workspaceRatioSpacing = 0;
         this._spacing = 0;
         this._animating = false; // tweening
@@ -92,7 +96,8 @@ WorkspacesView.prototype = {
         this._overviewShownId =
             Main.overview.connect('shown',
                                  Lang.bind(this, function() {
-                this.actor.set_clip(this._x, this._y, this._width, this._height);
+                this.actor.set_clip(this._clipX, this._clipY,
+                                    this._clipWidth, this._clipHeight);
         }));
 
         this._scrollAdjustment = new St.Adjustment({ value: activeWorkspaceIndex,
@@ -136,6 +141,13 @@ WorkspacesView.prototype = {
             this._workspaces[i].setGeometry(x, y, width, height);
     },
 
+    setClipRect: function(x, y, width, height) {
+        this._clipX = x;
+        this._clipY = y;
+        this._clipWidth = width;
+        this._clipHeight = height;
+    },
+
     _lookupWorkspaceForMetaWindow: function (metaWindow) {
         for (let i = 0; i < this._workspaces.length; i++) {
             if (this._workspaces[i].containsMetaWindow(metaWindow))
@@ -147,6 +159,10 @@ WorkspacesView.prototype = {
     getActiveWorkspace: function() {
         let active = global.screen.get_active_workspace_index();
         return this._workspaces[active];
+    },
+
+    getWorkspaceByIndex: function(index) {
+        return this._workspaces[index];
     },
 
     hide: function() {
@@ -433,7 +449,7 @@ WorkspacesView.prototype = {
             Mainloop.source_remove(this._timeoutId);
             this._timeoutId = 0;
         }
-        DND.removeMonitor(this._dragMonitor);
+        DND.removeDragMonitor(this._dragMonitor);
         this._inDrag = false;
 
         for (let i = 0; i < this._workspaces.length; i++)
@@ -551,6 +567,9 @@ WorkspacesDisplay.prototype = {
         this._updateAlwaysZoom();
 
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._updateAlwaysZoom));
+        global.screen.connect('notify::n-workspaces',
+                              Lang.bind(this, this._workspacesChanged));
+
         Main.xdndHandler.connect('drag-begin', Lang.bind(this, function(){
             this._alwaysZoomOut = true;
         }));
@@ -560,7 +579,6 @@ WorkspacesDisplay.prototype = {
             this._updateAlwaysZoom();
         }));
 
-        this._nWorkspacesNotifyId = 0;
         this._switchWorkspaceNotifyId = 0;
 
         this._itemDragBeginId = 0;
@@ -589,10 +607,6 @@ WorkspacesDisplay.prototype = {
             this.workspacesView.destroy();
         this.workspacesView = new WorkspacesView(this._workspaces);
         this._updateWorkspacesGeometry();
-
-        this._nWorkspacesNotifyId =
-            global.screen.connect('notify::n-workspaces',
-                                  Lang.bind(this, this._workspacesChanged));
 
         this._restackedNotifyId =
             global.screen.connect('restacked',
@@ -624,10 +638,6 @@ WorkspacesDisplay.prototype = {
         this._controls.hide();
         this._thumbnailsBox.hide();
 
-        if (this._nWorkspacesNotifyId > 0) {
-            global.screen.disconnect(this._nWorkspacesNotifyId);
-            this._nWorkspacesNotifyId = 0;
-        }
         if (this._restackedNotifyId > 0){
             global.screen.disconnect(this._restackedNotifyId);
             this._restackedNotifyId = 0;
@@ -676,7 +686,12 @@ WorkspacesDisplay.prototype = {
     },
 
     _updateAlwaysZoom: function()  {
-        this._alwaysZoomOut = false;
+        // Always show the pager if workspaces are actually used,
+        // e.g. there are windows on more than one
+        this._alwaysZoomOut = global.screen.n_workspaces > 2;
+
+        if (this._alwaysZoomOut)
+            return;
 
         let monitors = Main.layoutManager.monitors;
         let primary = Main.layoutManager.primaryMonitor;
@@ -747,6 +762,13 @@ WorkspacesDisplay.prototype = {
 
         let rtl = (St.Widget.get_default_direction () == St.TextDirection.RTL);
 
+        let clipWidth = width - controlsVisible;
+        let clipHeight = (fullHeight / fullWidth) * clipWidth;
+        let clipX = rtl ? x + controlsVisible : x;
+        let clipY = y + (fullHeight - clipHeight) / 2;
+
+        this.workspacesView.setClipRect(clipX, clipY, clipWidth, clipHeight);
+
         if (this._zoomOut) {
             width -= controlsNatural;
             if (rtl)
@@ -783,6 +805,12 @@ WorkspacesDisplay.prototype = {
         let active = global.screen.get_active_workspace_index();
 
         if (oldNumWorkspaces == newNumWorkspaces)
+            return;
+
+        this._updateAlwaysZoom();
+        this._updateZoom();
+
+        if (this.workspacesView == null)
             return;
 
         let lostWorkspaces = [];
@@ -826,7 +854,7 @@ WorkspacesDisplay.prototype = {
         if (Main.overview.animationInProgress)
             return;
 
-        let shouldZoom = this._alwaysZoomOut || this._controls.hover || (this._inDrag && !this._cancelledDrag);
+        let shouldZoom = this._alwaysZoomOut || this._controls.hover;
         if (shouldZoom != this._zoomOut) {
             this._zoomOut = shouldZoom;
             this._updateWorkspacesGeometry();
@@ -850,12 +878,22 @@ WorkspacesDisplay.prototype = {
     _dragBegin: function() {
         this._inDrag = true;
         this._cancelledDrag = false;
-        this._updateZoom();
+        this._dragMonitor = {
+            dragMotion: Lang.bind(this, this._onDragMotion)
+        };
+        DND.addDragMonitor(this._dragMonitor);
     },
 
     _dragCancelled: function() {
         this._cancelledDrag = true;
-        this._updateZoom();
+        DND.removeDragMonitor(this._dragMonitor);
+    },
+
+    _onDragMotion: function(dragEvent) {
+        let controlsHovered = this._controls.contains(dragEvent.targetActor);
+        this._controls.set_hover(controlsHovered);
+
+        return DND.DragMotionResult.CONTINUE;
     },
 
     _dragEnd: function() {

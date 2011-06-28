@@ -27,6 +27,9 @@ LayoutManager.prototype = {
         this.primaryContentArea = this.overviewContentArea = this.primaryMonitor;
     },
 
+    // This is called by Main after everything else is constructed;
+    // _updateHotCorners needs access to Main.panel, which didn't exist
+    // yet when the LayoutManager was constructed.
     init: function() {
         this._panelHeight = Main.panel.actor.height;
         this._trayHeight = Main.messageTray.actor.height;
@@ -53,18 +56,13 @@ LayoutManager.prototype = {
         if (nMonitors == 1) {
             this.primaryIndex = this.bottomIndex = 0;
         } else {
-            // If there are monitors above the primary, then we need
-            // to redeclare the topmost monitor to be the primary.
-            // Likewise, if there are monitors below it, we need to
-            // split primary from bottom.
-
+            // If there are monitors below the primary, then we need
+            // to split primary from bottom.
             this.primaryIndex = this.bottomIndex = screen.get_primary_monitor();
             for (let i = 0; i < this.monitors.length; i++) {
                 let monitor = this.monitors[i];
                 if (this._isAboveOrBelowPrimary(monitor)) {
-                    if (monitor.y < this.monitors[this.primaryIndex].y)
-                        this.primaryIndex = i;
-                    else if (monitor.y > this.monitors[this.bottomIndex].y)
+                    if (monitor.y > this.monitors[this.bottomIndex].y)
                         this.bottomIndex = i;
                 }
             }
@@ -183,18 +181,15 @@ LayoutManager.prototype = {
 
     _isAboveOrBelowPrimary: function(monitor) {
         let primary = this.monitors[this.primaryIndex];
+        let monitorLeft = monitor.x, monitorRight = monitor.x + monitor.width;
+        let primaryLeft = primary.x, primaryRight = primary.x + primary.width;
 
-        if (this._rtl) {
-            if (monitor.x + monitor.width == primary.x + primary.width)
-                return true;
-        } else {
-            if (monitor.x == primary.x)
-                return true;
-        }
-
-        if (monitor.x <= primary.x &&
-            (monitor.x + monitor.width) >= (primary.x + primary.width))
+        if ((monitorLeft >= primaryLeft && monitorLeft <= primaryRight) ||
+            (monitorRight >= primaryLeft && monitorRight <= primaryRight) ||
+            (primaryLeft >= monitorLeft && primaryLeft <= monitorRight) ||
+            (primaryRight >= monitorLeft && primaryRight <= monitorRight))
             return true;
+
         return false;
     },
 

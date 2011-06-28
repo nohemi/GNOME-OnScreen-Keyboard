@@ -222,7 +222,7 @@ Overview.prototype = {
         }
         this._resetWindowSwitchTimeout();
         this._lastHoveredWindow = null;
-        DND.removeMonitor(this._dragMonitor);
+        DND.removeDragMonitor(this._dragMonitor);
         this.endItemDrag();
     },
 
@@ -283,7 +283,8 @@ Overview.prototype = {
     },
 
     _onButtonPress: function(actor, event) {
-        if (this._scrollDirection == SwipeScrollDirection.NONE)
+        if (this._scrollDirection == SwipeScrollDirection.NONE
+            || event.get_button() != 1)
             return;
 
         let [stageX, stageY] = event.get_coords();

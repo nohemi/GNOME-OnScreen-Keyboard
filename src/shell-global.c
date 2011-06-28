@@ -69,8 +69,6 @@ struct _ShellGlobal {
 
   GdkWindow    *stage_window;
 
-  gint last_change_screen_width, last_change_screen_height;
-
   guint work_count;
   GSList *leisure_closures;
   guint leisure_function_id;
@@ -243,9 +241,6 @@ shell_global_init (ShellGlobal *global)
   global->stage_window = NULL;
 
   global->input_mode = SHELL_STAGE_INPUT_MODE_NORMAL;
-
-  global->last_change_screen_width = 0;
-  global->last_change_screen_height = 0;
 
   ca_context_create (&global->sound_context);
   ca_context_change_props (global->sound_context, CA_PROP_APPLICATION_NAME, PACKAGE_NAME, CA_PROP_APPLICATION_ID, "org.gnome.Shell", NULL);
@@ -700,23 +695,6 @@ shell_global_get_window_actors (ShellGlobal *global)
   return meta_plugin_get_window_actors (global->plugin);
 }
 
-static gboolean
-update_screen_size (gpointer data)
-{
-  int width, height;
-  ShellGlobal *global = SHELL_GLOBAL (data);
-
-  meta_plugin_query_screen_size (global->plugin, &width, &height);
-
-  if (global->last_change_screen_width == width && global->last_change_screen_height == height)
-    return FALSE;
-
-  global->last_change_screen_width = width;
-  global->last_change_screen_height = height;
-
-  return FALSE;
-}
-
 static void
 global_stage_notify_width (GObject    *gobject,
                            GParamSpec *pspec,
@@ -725,11 +703,6 @@ global_stage_notify_width (GObject    *gobject,
   ShellGlobal *global = SHELL_GLOBAL (data);
 
   g_object_notify (G_OBJECT (global), "screen-width");
-
-  meta_later_add (META_LATER_BEFORE_REDRAW,
-                  update_screen_size,
-                  global,
-                  NULL);
 }
 
 static void
@@ -740,11 +713,6 @@ global_stage_notify_height (GObject    *gobject,
   ShellGlobal *global = SHELL_GLOBAL (data);
 
   g_object_notify (G_OBJECT (global), "screen-height");
-
-  meta_later_add (META_LATER_BEFORE_REDRAW,
-                  update_screen_size,
-                  global,
-                  NULL);
 }
 
 static void
@@ -783,7 +751,6 @@ _shell_global_set_plugin (ShellGlobal *global,
                     G_CALLBACK (global_stage_notify_width), global);
   g_signal_connect (stage, "notify::height",
                     G_CALLBACK (global_stage_notify_height), global);
-  update_screen_size (global);
 
   g_signal_connect (stage, "paint",
                     G_CALLBACK (global_stage_before_paint), global);
@@ -1377,73 +1344,6 @@ shell_global_create_app_launch_context (ShellGlobal *global)
   gdk_app_launch_context_set_desktop (context, meta_screen_get_active_workspace_index (shell_global_get_screen (global)));
 
   return (GAppLaunchContext *)context;
-}
-
-/**
- * shell_global_set_property_mutable:
- * @global: the #ShellGlobal
- * @object: the "path" to a JS object, starting from the root object.
- *  (Eg, "global.stage" or "imports.gi.Gtk.Window.prototype")
- * @property: a property on @object
- * @mutable: %TRUE or %FALSE
- *
- * If @mutable is %TRUE, this clears the "permanent" and "readonly" flags
- * on @property of @object. If @mutable is %FALSE, it sets them.
- *
- * You can use this to make it possible to modify properties that
- * would otherwise be read-only from JavaScript.
- *
- * Return value: success or failure.
- */
-gboolean
-shell_global_set_property_mutable (ShellGlobal *global,
-                                   const char  *object,
-                                   const char  *property,
-                                   gboolean     mutable)
-{
-  JSContext *context = gjs_context_get_native_context (global->js_context);
-  char **parts;
-  JSObject *obj;
-  jsval val = JSVAL_VOID;
-  int i;
-  jsuint attrs;
-  JSBool found;
-
-  JS_BeginRequest (context);
-  JS_AddValueRoot (context, &val);
-
-  parts = g_strsplit (object, ".", -1);
-  obj = JS_GetGlobalObject (context);
-  for (i = 0; parts[i]; i++)
-    {
-      if (!JS_GetProperty (context, obj, parts[i], &val))
-        {
-          g_strfreev (parts);
-          goto out_error;
-        }
-      obj = JSVAL_TO_OBJECT (val);
-    }
-  g_strfreev (parts);
-
-  if (!JS_GetPropertyAttributes (context, obj, property, &attrs, &found) || !found)
-    goto out_error;
-
-  if (mutable)
-    attrs &= ~(JSPROP_PERMANENT | JSPROP_READONLY);
-  else
-    attrs |= (JSPROP_PERMANENT | JSPROP_READONLY);
-
-  if (!JS_SetPropertyAttributes (context, obj, property, attrs, &found))
-    goto out_error;
-
-  JS_RemoveValueRoot (context, &val);
-  JS_EndRequest (context);
-  return TRUE;
- out_error:
-  gjs_log_exception (context, NULL);
-  JS_RemoveValueRoot (context, &val);
-  JS_EndRequest (context);
-  return FALSE;
 }
 
 typedef struct
