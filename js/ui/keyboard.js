@@ -479,20 +479,21 @@ Keyboard.prototype = {
 
     // Window placement method
     _updatePosition: function (x, y) {
-       let primary = Main.layoutManager.primaryMonitor;
-       let [currentX, currentY] = this.actor.get_position();
-       x -= this.actor.width/2;
-       y += this.actor.height/2;
+        let primary = Main.layoutManager.primaryMonitor;
+        x -= this.actor.width / 2;
+        // Determines bottom/top centered
+        if (y <= primary.height / 2)
+            y += this.actor.height / 2;
+        else
+            y -= 3 * this.actor.height / 2;
 
-       // Accounting for monitor boundaries
-       if (x < primary.x)
-           x = primary.x;
-       if (x + this.actor.width > primary.width)
-           x = primary.width - this.actor.width;
-       if (y > this.actor.height * 2)
-           y = this.actor.height * 2;
+        // Accounting for monitor boundaries
+        if (x < primary.x)
+            x = primary.x;
+        if (x + this.actor.width > primary.width)
+            x = primary.width - this.actor.width;
 
-       this.actor.set_position(x, y);
+        this.actor.set_position(x, y);
     },
 
     // D-Bus methods
