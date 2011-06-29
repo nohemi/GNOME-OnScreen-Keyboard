@@ -257,6 +257,7 @@ Keyboard.prototype = {
             this.actor.disconnect(this._floatId);
         if (this._showKeyboard) {
             this.show();
+            this._reposition();
         } else {
             this.hide();
         }
@@ -466,7 +467,6 @@ Keyboard.prototype = {
 
     show: function () {
         this._redraw();
-        //this._reposition();
         this.actor.show();
         this._current_page.show();
     },
