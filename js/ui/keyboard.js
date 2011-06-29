@@ -505,11 +505,13 @@ Keyboard.prototype = {
     },
 
     SetCursorLocation: function(x, y, w, h) {
-        this._updatePosition(x, y);
+        if (this.floating)
+            this._updatePosition(x, y);
     },
 
     SetEntryLocation: function(x, y, w, h) {
-        this._updatePosition(x, y);
+        if (this.floating)
+            this._updatePosition(x, y);
     },
 
     get Name() {
