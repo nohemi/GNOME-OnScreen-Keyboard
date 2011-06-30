@@ -283,8 +283,11 @@ Keyboard.prototype = {
         if (this._dragging) // don't allow two drags at the same time
             return;
         this._dragging = true;
+        this._preDragStageMode = global.stage_input_mode;
 
         Clutter.grab_pointer(this.actor);
+        global.set_stage_input_mode(Shell.StageInputMode.FULLSCREEN);
+
         this._releaseId = this.actor.connect('button-release-event', Lang.bind(this, this._endDragging));
         this._motionId = this.actor.connect('motion-event', Lang.bind(this, this._motionEvent));
         [this._dragStartX, this._dragStartY] = event.get_coords();
@@ -297,6 +300,7 @@ Keyboard.prototype = {
             this.actor.disconnect(this._motionId);
 
             Clutter.ungrab_pointer();
+            global.set_stage_input_mode(this._preDragStageMode);
             global.unset_cursor();
             this._dragging = false;
         }
