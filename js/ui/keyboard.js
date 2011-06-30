@@ -18,8 +18,10 @@ const PopupMenu = imports.ui.popupMenu;
 
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD = 'show-keyboard';
+const KEYBOARD_TYPE = 'keyboard-type';
 const ENABLE_DRAGGABLE = 'enable-drag';
 const ENABLE_FLOAT = 'enable-float';
+
 // Key constants taken from Antler
 const PRETTY_KEYS = [
     { name: "BackSpace", label: "\u232b" },
@@ -218,22 +220,10 @@ Keyboard.prototype = {
 
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: false, reactive: true });
 
-        this._keyboard = new Caribou.KeyboardModel({ keyboard_type: 'touch' });
-
-        this._groups = {};
-        this._current_page = null;
-
-        // Initialize keyboard key measurements
-        this._numOfHorizKeys = 0;
-        this._numOfVertKeys = 0;
-
-        this._floatId = 0;
-
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._display));
-        this._addKeys();
 
-        this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
+        this._setupKeyboard();
 
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
@@ -245,7 +235,33 @@ Keyboard.prototype = {
         this._display();
     },
 
+    _setupKeyboard: function() {
+        if (this._keyboardNotifyId)
+            this._keyboard.disconnect(this._keyboardNotifyId);
+        let children = this.actor.get_children();
+        for (let i = 0; i < children.length; i++)
+            children[i].destroy();
+
+        this._keyboard = new Caribou.KeyboardModel({ keyboard_type: this._keyboardSettings.get_string(KEYBOARD_TYPE) });
+
+        this._groups = {};
+        this._current_page = null;
+
+        // Initialize keyboard key measurements
+        this._numOfHorizKeys = 0;
+        this._numOfVertKeys = 0;
+
+        this._floatId = 0;
+
+        this._addKeys();
+
+        this._keyboardNotifyId = this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
+    },
+
     _display: function () {
+        if (this._keyboard.keyboard_type != this._keyboardSettings.get_string(KEYBOARD_TYPE))
+            this._setupKeyboard();
+
         this._showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
         this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
         this.floating = this._keyboardSettings.get_boolean(ENABLE_FLOAT);

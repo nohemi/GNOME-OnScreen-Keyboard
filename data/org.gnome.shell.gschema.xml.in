@@ -85,6 +85,13 @@
         If true, display onscreen keyboard.
       </_description>
     </key>
+    <key name="keyboard-type" type="s">
+      <default>'touch'</default>
+      <_summary>Which keyboard to use</_summary>
+      <_description>
+        The type of keyboard to use.
+      </_description>
+    </key>
     <key name="enable-drag" type="b">
       <default>false</default>
       <_summary>Enable keyboard dragging</_summary>
