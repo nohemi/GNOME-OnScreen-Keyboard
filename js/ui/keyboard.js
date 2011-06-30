@@ -23,21 +23,21 @@ const ENABLE_DRAGGABLE = 'enable-drag';
 const ENABLE_FLOAT = 'enable-float';
 
 // Key constants taken from Antler
-const PRETTY_KEYS = [
-    { name: "BackSpace", label: "\u232b" },
-    { name: "space", label: " " },
-    { name: "Return", label: "\u23ce" },
-    { name: "Caribou_Prefs", label: "\u2328" },
-    { name: "Caribou_ShiftUp", label: "\u2b06" },
-    { name: "Caribou_ShiftDown", label: "\u2b07" },
-    { name: "Caribou_Emoticons", label: "\u263a" },
-    { name: "Caribou_Symbols", label: "123" },
-    { name: "Caribou_Symbols_More", label: "{#*" },
-    { name: "Caribou_Alpha", label: "Abc" },
-    { name: "Tab", label: "Tab" },
-    { name: "Escape", label: "Esc" },
-    { name: "Control", label: "Ctrl" }
-];
+const PRETTY_KEYS = {
+    'BackSpace': '\u232b',
+    'space': ' ',
+    'Return': '\u23ce',
+    'Caribou_Prefs': '\u2328',
+    'Caribou_ShiftUp': '\u2b06',
+    'Caribou_ShiftDown': '\u2b07',
+    'Caribou_Emoticons': '\u263a',
+    'Caribou_Symbols': '123',
+    'Caribou_Symbols_More': '{#*',
+    'Caribou_Alpha': 'Abc',
+    'Tab': 'Tab',
+    'Escape': 'Esc',
+    'Control': 'Ctrl'
+};
 
 const CaribouKeyboardIface = {
     name: 'org.gnome.Caribou.Keyboard',
@@ -90,14 +90,14 @@ Key.prototype = {
             this._grabbed = false;
             this._eventCaptureId = 0;
             this._key.connect('notify::show-subkeys', Lang.bind(this, this._onShowSubkeysChanged));
-            this.actor.boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
-                                                   { x_fill: true,
-                                                     y_fill: true,
-                                                     x_align: St.Align.START });
-            this._boxPointer = this.actor.boxPointer;
+            this._boxPointer = new BoxPointer.BoxPointer(St.Side.BOTTOM,
+                                                         { x_fill: true,
+                                                           y_fill: true,
+                                                           x_align: St.Align.START });
             // Adds style to existing keyboard style to avoid repetition
             this._boxPointer.actor.add_style_class_name('keyboard-subkeys');
             this._getExtendedKeys();
+            this.actor._extended_keys = this._extended_keyboard;
             this._boxPointer.actor.hide();
             Main.chrome.addActor(this._boxPointer.actor, { visibleInFullscreen: true,
                                                            affectsStruts: false });
@@ -107,20 +107,12 @@ Key.prototype = {
     _getKey: function () {
         let label = this._key.name;
 
-        if (this._key.name.length > 1) {
-            let foundPretty = false;
-
-            for (let i = 0; i < PRETTY_KEYS.length; ++i) {
-                if (this._key.name == PRETTY_KEYS[i].name) {
-                    label = PRETTY_KEYS[i].label;
-                    foundPretty = true;
-                    break;
-                }
-            }
-
-            if (!foundPretty) {
+        if (label.length > 1) {
+            let pretty = PRETTY_KEYS[label];
+            if (pretty)
+                label = pretty;
+            else
                 label = this._getUnichar(this._key);
-            }
         }
 
         label = GLib.markup_escape_text(label, -1);
@@ -344,13 +336,15 @@ Keyboard.prototype = {
     },
 
     _addKeys: function () {
-        for (let i = 0; i < this._keyboard.get_groups().length; ++i) {
-             let gname = this._keyboard.get_groups()[i];
+        let groups = this._keyboard.get_groups();
+        for (let i = 0; i < groups.length; ++i) {
+             let gname = groups[i];
              let group = this._keyboard.get_group(gname);
              group.connect('notify::active-level', Lang.bind(this, this._onLevelChanged));
              let layers = {};
-             for (let j = 0; j < group.get_levels().length; ++j) {
-                 let lname = group.get_levels()[j];
+             let levels = group.get_levels();
+             for (let j = 0; j < levels.length; ++j) {
+                 let lname = levels[j];
                  let level = group.get_level(lname);
                  let layout = new St.BoxLayout({ style_class: 'keyboard-layout',
                                                  vertical: 'false' });
@@ -383,12 +377,12 @@ Keyboard.prototype = {
 
     _addRows : function (keys, layout) {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
-        let primary_monitor = Main.layoutManager.primaryMonitor;
         for (let i = 0; i < keys.length; ++i) {
-            for (let j = 0; j < keys[i].get_children().length; ++j) {
+            let children = keys[i].get_children();
+            for (let j = 0; j < children.length; ++j) {
                 if (this._numOfHorizKeys == 0)
-                    this._numOfHorizKeys = keys[i].get_children().length;
-                let key = keys[i].get_children()[j];
+                    this._numOfHorizKeys = children.length;
+                let key = children[j];
                 let button = new Key(key, 0, 0);
                 if (key.margin_left > 0) {
                     let separator = new St.Bin();
@@ -429,16 +423,18 @@ Keyboard.prototype = {
             this._current_page.connect('style-changed', Lang.bind(this, this._onStyleChanged));
 
         let primary_monitor = Main.layoutManager.primaryMonitor;
-        for (let i = 0; i < this._current_page.get_children().length; ++i) {
-            let keyboard_row = this._current_page.get_children()[i];
+        let rows = this._current_page.get_children();
+        for (let i = 0; i < rows.length; ++i) {
+            let keyboard_row = rows[i];
 
             if (this._horizontalSpacing == 0)
                 keyboard_row.connect('style-changed', Lang.bind(this, this._onStyleChanged));
 
             this._onStyleChanged(keyboard_row);
             this._onStyleChanged(this._current_page);
-            for (let j = 0; j < keyboard_row.get_children().length; ++j) {
-                let child = keyboard_row.get_children()[j];
+            let keys = keyboard_row.get_children();
+            for (let j = 0; j < keys.length; ++j) {
+                let child = keys[j];
                 child.width = (primary_monitor.width - (this._numOfHorizKeys - 1) * this._horizontalSpacing
                              - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
                 child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
@@ -448,10 +444,10 @@ Keyboard.prototype = {
                     child.width = child.height * child.key_width;
                 }
                 child.draggable = this._draggable;
-                if (child.boxPointer) {
-                    let extended_keys = child.boxPointer.bin.get_children()[0];
-                    for (let k = 0; k < extended_keys.get_children().length; ++k) {
-                        let extended_key = extended_keys.get_children()[k];
+                if (child._extended_keys) {
+                    let extended_keys = child._extended_keys.get_children();
+                    for (let k = 0; k < extended_keys.length; ++k) {
+                        let extended_key = extended_keys[k];
                         extended_key.width = child.width;
                         extended_key.height = child.height;
                         extended_key.draggable = this._draggable;
