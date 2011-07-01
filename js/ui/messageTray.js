@@ -1770,7 +1770,8 @@ MessageTray.prototype = {
         }
 
         // Summary
-        let summarySummoned = this._pointerInSummary || this._overviewVisible;
+        let summarySummoned = this._pointerInSummary || this._overviewVisible ||
+                              (Main.keyboard.actor.visible && !Main.keyboard.floating);
         let summaryPinned = this._summaryTimeoutId != 0 || this._pointerInTray || summarySummoned || this._locked;
         let summaryHovered = this._pointerInTray || this._pointerInSummary;
         let summaryVisibleWithNoHover = (this._overviewVisible || this._locked) && !summaryHovered;
@@ -1865,11 +1866,11 @@ MessageTray.prototype = {
 
     _showTray: function() {
         let monitor = Main.layoutManager.bottomMonitor;
-        let trayY = monitor.y + monitor.height - this.actor.height;
+        let y = monitor.y + monitor.height - this.actor.height;
         if (Main.keyboard.actor.visible && !Main.keyboard.floating)
-            trayY -= Main.keyboard.actor.height;
+            y -= Main.keyboard.actor.height;
         this._tween(this.actor, '_trayState', State.SHOWN,
-                    { y: trayY,
+                    { y: y,
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
@@ -1877,11 +1878,9 @@ MessageTray.prototype = {
 
     _hideTray: function() {
         let monitor = Main.layoutManager.bottomMonitor;
-        let trayY = monitor.y + monitor.height -1;
-        if (Main.keyboard.actor.visible && !Main.keyboard.floating)
-            trayY -= Main.keyboard.actor.height;
+        let y = monitor.y + monitor.height - 1;
         this._tween(this.actor, '_trayState', State.HIDDEN,
-                    { y: trayY,
+                    { y: y,
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
