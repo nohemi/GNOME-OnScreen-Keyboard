@@ -188,11 +188,13 @@ Key.prototype = {
             this._boxPointer.actor.raise_top();
             this._boxPointer.setPosition(this.actor, 5, 0.5);
             this._boxPointer.show(true);
+            this.actor.set_hover(false);
             if (!this._grabbed) {
                  Main.pushModal(this.actor);
                  this._eventCaptureId = global.stage.connect('captured-event', Lang.bind(this, this._onEventCapture));
                  this._grabbed = true;
             }
+            this._key.release();
         } else {
             if (this._grabbed)
                 this._ungrab();
@@ -235,7 +237,6 @@ Keyboard.prototype = {
             children[i].destroy();
 
         this._keyboard = new Caribou.KeyboardModel({ keyboard_type: this._keyboardSettings.get_string(KEYBOARD_TYPE) });
-
         this._groups = {};
         this._current_page = null;
 
