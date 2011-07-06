@@ -36,7 +36,8 @@ const PRETTY_KEYS = {
     'Caribou_Alpha': 'Abc',
     'Tab': 'Tab',
     'Escape': 'Esc',
-    'Control': 'Ctrl'
+    'Control_L': 'Ctrl',
+    'Alt_L': 'Alt'
 };
 
 const CaribouKeyboardIface = {
@@ -78,7 +79,7 @@ Key.prototype = {
         this._extended_keys = this._key.get_extended_keys();
         this._extended_keyboard = {};
 
-        if (this._key.name == "Control" || this._key.name == "Alt")
+        if (this._key.name == "Control_L" || this._key.name == "Alt_L")
             this._key.latch = true;
 
         this._key.connect('key-pressed', Lang.bind(this, function ()
@@ -385,11 +386,6 @@ Keyboard.prototype = {
                     this._numOfHorizKeys = children.length;
                 let key = children[j];
                 let button = new Key(key, 0, 0);
-                if (key.margin_left > 0) {
-                    let separator = new St.Bin();
-                    separator.key_width = key.margin_left;
-                    keyboard_row.add(separator);
-                }
                 keyboard_row.add(button.actor);
                 if (key.name == "Caribou_Prefs") {
                     key.connect('key-released', Lang.bind(this, this._onPrefsClick));
