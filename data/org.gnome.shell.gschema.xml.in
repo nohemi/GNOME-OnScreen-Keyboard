@@ -100,7 +100,7 @@
       </_description>
     </key>
     <key name="enable-float" type="b">
-      <default>false</default>
+      <default>true</default>
       <_summary>Enable floating keyboard</_summary>
       <_description>
         If true, enable floating keyboard.
