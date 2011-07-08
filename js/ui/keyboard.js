@@ -381,19 +381,27 @@ Keyboard.prototype = {
         let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
         for (let i = 0; i < keys.length; ++i) {
             let children = keys[i].get_children();
+            let right_box = new St.BoxLayout({ style_class: 'keyboard-row' });
+            let left_box = new St.BoxLayout({ style_class: 'keyboard-row' });
             for (let j = 0; j < children.length; ++j) {
                 if (this._numOfHorizKeys == 0)
                     this._numOfHorizKeys = children.length;
                 let key = children[j];
                 let button = new Key(key, 0, 0);
-                keyboard_row.add(button.actor);
+
+                if (key.align == 'right')
+                    right_box.add(button.actor);
+                else
+                    left_box.add(button.actor);
                 if (key.name == "Caribou_Prefs") {
                     key.connect('key-released', Lang.bind(this, this._onPrefsClick));
 
                     // Add new key for hiding message tray
-                    keyboard_row.add(this._getTrayIcon());
+                    right_box.add(this._getTrayIcon());
                 }
             }
+            keyboard_row.add(left_box, { expand: true, x_fill: true});
+            keyboard_row.add(right_box, { expand: true, x_fill: true});
         }
         layout.add(keyboard_row);
     },
@@ -423,31 +431,33 @@ Keyboard.prototype = {
         let rows = this._current_page.get_children();
         for (let i = 0; i < rows.length; ++i) {
             let keyboard_row = rows[i];
-
             if (this._horizontalSpacing == 0)
                 keyboard_row.connect('style-changed', Lang.bind(this, this._onStyleChanged));
 
             this._onStyleChanged(keyboard_row);
             this._onStyleChanged(this._current_page);
-            let keys = keyboard_row.get_children();
-            for (let j = 0; j < keys.length; ++j) {
-                let child = keys[j];
-                child.width = (primary_monitor.width - (this._numOfHorizKeys - 1) * this._horizontalSpacing
-                             - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
-                child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
-                              - 2 * this._padding) / this._numOfVertKeys;
-                if (this.floating) {
-                    child.height = Math.min(child.width, child.height);
-                    child.width = child.height * child.key_width;
-                }
-                child.draggable = this._draggable;
-                if (child._extended_keys) {
-                    let extended_keys = child._extended_keys.get_children();
-                    for (let k = 0; k < extended_keys.length; ++k) {
-                        let extended_key = extended_keys[k];
-                        extended_key.width = child.width;
-                        extended_key.height = child.height;
-                        extended_key.draggable = this._draggable;
+            let boxes = keyboard_row.get_children();
+            for (let j = 0; j < boxes.length; ++j) {
+                let keys = boxes[j].get_children();
+                for (let k = 0; k < keys.length; ++k) {
+                    let child = keys[k];
+                    child.width = (primary_monitor.width - (this._numOfHorizKeys - 1) * this._horizontalSpacing
+                                   - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
+                    child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
+                                   - 2 * this._padding) / this._numOfVertKeys;
+                    if (this.floating) {
+                        child.height = Math.min(child.width, child.height);
+                        child.width = child.height * child.key_width;
+                    }
+                    child.draggable = this._draggable;
+                    if (child._extended_keys) {
+                        let extended_keys = child._extended_keys.get_children();
+                        for (let n = 0; n < extended_keys.length; ++n) {
+                            let extended_key = extended_keys[n];
+                            extended_key.width = child.width;
+                            extended_key.height = child.height;
+                            extended_key.draggable = this._draggable;
+                        }
                     }
                 }
             }
