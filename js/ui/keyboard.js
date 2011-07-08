@@ -349,7 +349,7 @@ Keyboard.prototype = {
                  let lname = levels[j];
                  let level = group.get_level(lname);
                  let layout = new St.BoxLayout({ style_class: 'keyboard-layout',
-                                                 vertical: 'false' });
+                                                 vertical: true });
                  this._loadRows(level, layout);
                  layers[lname] = layout;
                  this.actor.add(layout);
