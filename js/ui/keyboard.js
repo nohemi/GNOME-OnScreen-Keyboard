@@ -269,6 +269,8 @@ Keyboard.prototype = {
             this.show();
             this._reposition();
         } else {
+            if (this._source)
+                this._source.destroy();
             this.hide();
         }
     },
@@ -407,6 +409,8 @@ Keyboard.prototype = {
     },
 
     _onPrefsClick: function () {
+        this._source = new KeyboardSource(this);
+        Main.messageTray.add(this._source);
         this.hide();
     },
 
@@ -493,8 +497,6 @@ Keyboard.prototype = {
     },
 
     hide: function () {
-        let source = new KeyboardSource(this);
-        Main.messageTray.add(source);
         this.actor.hide();
         this._current_page.hide();
         this.showTray = true;
@@ -525,6 +527,8 @@ Keyboard.prototype = {
     },
 
     Hide: function() {
+        this._source = new KeyboardSource(this);
+        Main.messageTray.add(this._source);
         this.hide();
     },
 
