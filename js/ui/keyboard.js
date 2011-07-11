@@ -407,8 +407,6 @@ Keyboard.prototype = {
     },
 
     _onPrefsClick: function () {
-        let source = new KeyboardSource(this);
-        Main.messageTray.add(source);
         this.hide();
     },
 
@@ -495,6 +493,8 @@ Keyboard.prototype = {
     },
 
     hide: function () {
+        let source = new KeyboardSource(this);
+        Main.messageTray.add(source);
         this.actor.hide();
         this._current_page.hide();
         this.showTray = true;
