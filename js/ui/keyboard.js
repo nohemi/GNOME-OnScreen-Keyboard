@@ -269,8 +269,6 @@ Keyboard.prototype = {
             this.show();
             this._reposition();
         } else {
-            if (this._source)
-                this._source.destroy();
             this.hide();
         }
     },
@@ -491,12 +489,19 @@ Keyboard.prototype = {
     },
 
     show: function () {
+        if (this._source)
+            this._source.destroy();
+        this._source = null;
         this._redraw();
         this.actor.show();
         this._current_page.show();
     },
 
     hide: function () {
+        if (this._source == null) {
+            this._source = new KeyboardSource(this);
+            Main.messageTray.add(this._source);
+        }
         this.actor.hide();
         this._current_page.hide();
         this.showTray = true;
@@ -527,8 +532,6 @@ Keyboard.prototype = {
     },
 
     Hide: function() {
-        this._source = new KeyboardSource(this);
-        Main.messageTray.add(this._source);
         this.hide();
     },
 
