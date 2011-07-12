@@ -526,23 +526,44 @@ Keyboard.prototype = {
         this.actor.set_position(x, y);
     },
 
+    _moveTemporarily: function (x, y) {
+        this._currentWindow = global.screen.get_display().focus_window;
+        this._currentWindow.x = x;
+        this._currentWindow.y = y;
+
+        let newY = 3 * this.actor.height / 2;
+        let newX = x;
+        this._currentWindow.move(true, newX, newY);
+    },
+
+    _setLocation: function (x, y) {
+        if (this.floating)
+            this._updatePosition(x, y);
+        else {
+            if (y >= 2 * this.actor.height)
+                this._moveTemporarily(x, y);
+        }
+    },
+
     // D-Bus methods
     Show: function() {
         this.show();
     },
 
     Hide: function() {
+        if (this._currentWindow) {
+            this._currentWindow.move(true, this._currentWindow.x, this._currentWindow.y);
+            this._currentWindow = null;
+        }
         this.hide();
     },
 
     SetCursorLocation: function(x, y, w, h) {
-        if (this.floating)
-            this._updatePosition(x, y);
+        this._setLocation(x, y);
     },
 
     SetEntryLocation: function(x, y, w, h) {
-        if (this.floating)
-            this._updatePosition(x, y);
+        this._setLocation(x, y);
     },
 
     get Name() {
