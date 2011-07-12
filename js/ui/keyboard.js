@@ -526,14 +526,15 @@ Keyboard.prototype = {
         this.actor.set_position(x, y);
     },
 
-    _moveTemporarily: function (x, y) {
+    _moveTemporarily: function () {
         this._currentWindow = global.screen.get_display().focus_window;
-        this._currentWindow.x = x;
-        this._currentWindow.y = y;
+        let rect = this._currentWindow.get_outer_rect();
+        this._currentWindow.x = rect.x;
+        this._currentWindow.y = rect.y;
 
+        let newX = this._currentWindow.x;
         let newY = 3 * this.actor.height / 2;
-        let newX = x;
-        this._currentWindow.move(true, newX, newY);
+        this._currentWindow.move_frame(true, newX, newY);
     },
 
     _setLocation: function (x, y) {
@@ -541,7 +542,7 @@ Keyboard.prototype = {
             this._updatePosition(x, y);
         else {
             if (y >= 2 * this.actor.height)
-                this._moveTemporarily(x, y);
+                this._moveTemporarily();
         }
     },
 
@@ -552,7 +553,8 @@ Keyboard.prototype = {
 
     Hide: function() {
         if (this._currentWindow) {
-            this._currentWindow.move(true, this._currentWindow.x, this._currentWindow.y);
+            this._currentWindow.move_frame(true, this._currentWindow.x, this._currentWindow.y);
+            log(this._currentWindow.y);
             this._currentWindow = null;
         }
         this.hide();
