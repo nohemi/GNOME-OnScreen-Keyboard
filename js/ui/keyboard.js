@@ -268,6 +268,7 @@ Keyboard.prototype = {
             this._reposition();
         } else {
             this.hide();
+            this.destroySource();
         }
     },
 
@@ -398,8 +399,7 @@ Keyboard.prototype = {
     },
 
     _onPrefsClick: function () {
-        this._source = new KeyboardSource(this);
-        Main.messageTray.add(this._source);
+        this.createSource();
         this.hide();
     },
 
@@ -479,20 +479,27 @@ Keyboard.prototype = {
         this._current_page.show();
     },
 
-    show: function () {
-        if (this._source)
+    createSource: function () {
+        if (this._source == null) {
+            this._source = new KeyboardSource(this);
+            Main.messageTray.add(this._source);
+        }
+    },
+
+    destroySource: function () {
+        if (this._source) {
             this._source.destroy();
-        this._source = null;
+            this._source = null;
+        }
+    },
+
+    show: function () {
         this._redraw();
         this.actor.show();
         this._current_page.show();
     },
 
     hide: function () {
-        if (this._source == null) {
-            this._source = new KeyboardSource(this);
-            Main.messageTray.add(this._source);
-        }
         this.actor.hide();
         this._current_page.hide();
     },
@@ -538,6 +545,7 @@ Keyboard.prototype = {
 
     // D-Bus methods
     Show: function() {
+        this.destroySource();
         this.show();
     },
 
@@ -547,6 +555,7 @@ Keyboard.prototype = {
             log(this._currentWindow.y);
             this._currentWindow = null;
         }
+        this.createSource();
         this.hide();
     },
 
@@ -598,6 +607,6 @@ KeyboardSource.prototype = {
 
     open: function() {
         this._keyboard.show();
-        this.destroy();
+        this._keyboard.destroySource();
     }
 };
