@@ -404,7 +404,7 @@ Keyboard.prototype = {
             let row = rows[i];
             if (this._numOfVertKeys == 0)
                 this._numOfVertKeys = rows.length;
-            this._addRows(row.get_columns(),layout);
+            this._addRows(row.get_columns(), layout);
         }
 
     },
