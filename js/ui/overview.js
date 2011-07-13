@@ -153,6 +153,18 @@ Overview.prototype = {
 
         this._coverPane.hide();
 
+        this._windowSwitchTimeoutId = 0;
+        this._windowSwitchTimestamp = 0;
+        this._lastActiveWorkspaceIndex = -1;
+        this._lastHoveredWindow = null;
+        this._needsFakePointerEvent = false;
+
+        this.workspaces = null;
+
+        Main.connect('initialized', Lang.bind(this, this._finishInit));
+    },
+
+    _finishInit: function() {
         // XDND
         this._dragMonitor = {
             dragMotion: Lang.bind(this, this._onDragMotion)
@@ -161,22 +173,11 @@ Overview.prototype = {
         Main.xdndHandler.connect('drag-begin', Lang.bind(this, this._onDragBegin));
         Main.xdndHandler.connect('drag-end', Lang.bind(this, this._onDragEnd));
 
-        this._windowSwitchTimeoutId = 0;
-        this._windowSwitchTimestamp = 0;
-        this._lastActiveWorkspaceIndex = -1;
-        this._lastHoveredWindow = null;
-        this._needsFakePointerEvent = false;
-
-        this.workspaces = null;
-    },
-
-    // The members we construct that are implemented in JS might
-    // want to access the overview as Main.overview to connect
-    // signal handlers and so forth. So we create them after
-    // construction in this init() method.
-    init: function() {
         this.shellInfo = new ShellInfo();
 
+        // The members we construct that are implemented in JS might
+        // want to access the overview as Main.overview to connect
+        // signal handlers and so forth. So we create them here.
         this.viewSelector = new ViewSelector.ViewSelector();
         this._group.add_actor(this.viewSelector.actor);
 

@@ -10,6 +10,7 @@ const Lang = imports.lang;
 const Mainloop = imports.mainloop;
 const Meta = imports.gi.Meta;
 const Shell = imports.gi.Shell;
+const Signals = imports.signals;
 const St = imports.gi.St;
 
 const Chrome = imports.ui.chrome;
@@ -67,6 +68,9 @@ let _errorLogStack = [];
 let _startDate;
 let _defaultCssStylesheet = null;
 let _cssStylesheet = null;
+
+const Main = this;
+Signals.addSignalMethods(Main)
 
 function start() {
     // Monkey patch utility functions into the global proxy;
@@ -128,25 +132,34 @@ function start() {
     global.overlay_group.reparent(uiGroup);
     global.stage.add_actor(uiGroup);
 
-    layoutManager = new Layout.LayoutManager();
-    placesManager = new PlaceDisplay.PlacesManager();
-    xdndHandler = new XdndHandler.XdndHandler();
-    ctrlAltTabManager = new CtrlAltTab.CtrlAltTabManager();
-    overview = new Overview.Overview();
-    chrome = new Chrome.Chrome();
-    magnifier = new Magnifier.Magnifier();
-    statusIconDispatcher = new StatusIconDispatcher.StatusIconDispatcher();
-    panel = new Panel.Panel();
-    wm = new WindowManager.WindowManager();
-    messageTray = new MessageTray.MessageTray();
-    notificationDaemon = new NotificationDaemon.NotificationDaemon();
-    windowAttentionHandler = new WindowAttentionHandler.WindowAttentionHandler();
-    telepathyClient = new TelepathyClient.Client();
-    keyboard = new Keyboard.Keyboard();
+    // Initialize JS modules. We do this in several steps, so that
+    // less-fundamental modules can depend on more-fundamental ones.
 
-    layoutManager.init();
-    overview.init();
-    statusIconDispatcher.start(messageTray.actor);
+    // Overall layout management
+    layoutManager = new Layout.LayoutManager();
+    chrome = new Chrome.Chrome();
+    ctrlAltTabManager = new CtrlAltTab.CtrlAltTabManager();
+    Main.emit('layout-initialized');
+
+    // Major UI elements; initialize overview first since both panel
+    // and messageTray connect to its signals
+    overview = new Overview.Overview();
+    panel = new Panel.Panel();
+    messageTray = new MessageTray.MessageTray();
+    Main.emit('main-ui-initialized');
+
+    // Now the rest of the JS modules (arbitrarily in alphabetical
+    // order).
+    magnifier = new Magnifier.Magnifier();
+    notificationDaemon = new NotificationDaemon.NotificationDaemon();
+    placesManager = new PlaceDisplay.PlacesManager();
+    statusIconDispatcher = new StatusIconDispatcher.StatusIconDispatcher();
+    telepathyClient = new TelepathyClient.Client();
+    windowAttentionHandler = new WindowAttentionHandler.WindowAttentionHandler();
+    wm = new WindowManager.WindowManager();
+    xdndHandler = new XdndHandler.XdndHandler();
+
+    Main.emit('initialized');
 
     _startDate = new Date();
 
@@ -186,6 +199,7 @@ function start() {
     ExtensionSystem.init();
     ExtensionSystem.loadExtensions();
 
+    // Initialize the panel status area now that extensions are loaded
     panel.startStatusArea();
     panel.startupAnimation();
 

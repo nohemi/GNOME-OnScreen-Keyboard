@@ -980,9 +980,6 @@ Panel.prototype = {
                 corner.actor.set_style_pseudo_class(pseudoClass);
             }));
 
-        Main.statusIconDispatcher.connect('status-icon-added', Lang.bind(this, this._onTrayIconAdded));
-        Main.statusIconDispatcher.connect('status-icon-removed', Lang.bind(this, this._onTrayIconRemoved));
-
         // TODO: decide what to do with the rest of the panel in the Overview mode (make it fade-out, become non-reactive, etc.)
         // We get into the Overview mode on button-press-event as opposed to button-release-event because eventually we'll probably
         // have the Overview act like a menu that allows the user to release the mouse on the activity the user wants
@@ -995,6 +992,7 @@ Panel.prototype = {
                 return false;
             }
         }));
+
         // In addition to pressing the button, the Overview can be entered and exited by other means, such as
         // pressing the System key, Alt+F1 or Esc. We want the button to be pressed in when the Overview is entered
         // and to be released when it is exited regardless of how it was triggered.
@@ -1060,8 +1058,11 @@ Panel.prototype = {
             this._statusArea[role] = indicator;
         }
 
+        Main.statusIconDispatcher.connect('status-icon-added', Lang.bind(this, this._onTrayIconAdded));
+        Main.statusIconDispatcher.connect('status-icon-removed', Lang.bind(this, this._onTrayIconRemoved));
+
         // PopupMenuManager depends on menus being added in order for
-        // keyboard navigation
+        // keyboard navigation, so we couldn't add this before
         this._menus.addMenu(this._userMenu.menu);
     },
 

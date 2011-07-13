@@ -20,22 +20,14 @@ LayoutManager.prototype = {
         this.primaryIndex = -1;
         this._hotCorners = [];
 
+        global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
         this._updateMonitors();
 
-        // in case someone looks at these before they've been computed;
-        // we'll emit 'content-area-changed' when they're correct
-        this.primaryContentArea = this.overviewContentArea = this.primaryMonitor;
+        Main.connect('main-ui-initialized', Lang.bind(this, this._finishInit));
     },
 
-    // This is called by Main after everything else is constructed;
-    // _updateHotCorners needs access to Main.panel, which didn't exist
-    // yet when the LayoutManager was constructed.
-    init: function() {
-        this._panelHeight = Main.panel.actor.height;
-        this._trayHeight = Main.messageTray.actor.height;
-        this._keyboardHeight = Main.keyboard.actor.height;
-
-        global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
+    // _updateHotCorners needs access to Main.panel
+    _finishInit: function() {
         this._updateHotCorners();
 
         Main.panel.actor.connect('allocation-changed', Lang.bind(this, this._allocationChanged));
