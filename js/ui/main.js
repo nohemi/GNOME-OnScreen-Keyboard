@@ -42,33 +42,31 @@ DEFAULT_BACKGROUND_COLOR.from_pixel(0x2266bbff);
 
 let chrome = null;
 let panel = null;
-let hotCorners = [];
 let placesManager = null;
 let overview = null;
-let runDialog = null;
-let lookingGlass = null;
 let wm = null;
 let messageTray = null;
 let notificationDaemon = null;
 let windowAttentionHandler = null;
 let telepathyClient = null;
 let ctrlAltTabManager = null;
-let recorder = null;
 let shellDBusService = null;
-let modalCount = 0;
-let modalActorFocusStack = [];
 let uiGroup = null;
 let magnifier = null;
 let xdndHandler = null;
 let statusIconDispatcher = null;
 let keyboard = null;
 let layoutManager = null;
+
+let _runDialog = null;
+let _lookingGlass = null;
+let _recorder = null;
+let _modalCount = 0;
+let _modalActorFocusStack = [];
 let _errorLogStack = [];
 let _startDate;
 let _defaultCssStylesheet = null;
 let _cssStylesheet = null;
-
-let background = null;
 
 function start() {
     // Monkey patch utility functions into the global proxy;
@@ -155,24 +153,24 @@ function start() {
     let recorderSettings = new Gio.Settings({ schema: 'org.gnome.shell.recorder' });
 
     global.screen.connect('toggle-recording', function() {
-        if (recorder == null) {
-            recorder = new Shell.Recorder({ stage: global.stage });
+        if (_recorder == null) {
+            _recorder = new Shell.Recorder({ stage: global.stage });
         }
 
-        if (recorder.is_recording()) {
-            recorder.pause();
+        if (_recorder.is_recording()) {
+            _recorder.pause();
         } else {
             // read the parameters from GSettings always in case they have changed
-            recorder.set_framerate(recorderSettings.get_int('framerate'));
-            recorder.set_filename('shell-%d%u-%c.' + recorderSettings.get_string('file-extension'));
+            _recorder.set_framerate(recorderSettings.get_int('framerate'));
+            _recorder.set_filename('shell-%d%u-%c.' + recorderSettings.get_string('file-extension'));
             let pipeline = recorderSettings.get_string('pipeline');
 
             if (!pipeline.match(/^\s*$/))
-                recorder.set_pipeline(pipeline);
+                _recorder.set_pipeline(pipeline);
             else
-                recorder.set_pipeline(null);
+                _recorder.set_pipeline(null);
 
-            recorder.record();
+            _recorder.record();
         }
     });
 
@@ -500,7 +498,7 @@ function getWindowActorsForWorkspace(workspaceIndex) {
 // all key events will be delivered to the stage, so ::captured-event
 // on the stage can be used for global keybindings.)
 function _globalKeyPressHandler(actor, event) {
-    if (modalCount == 0)
+    if (_modalCount == 0)
         return false;
     if (event.type() != Clutter.EventType.KEY_PRESS)
         return false;
@@ -525,7 +523,7 @@ function _globalKeyPressHandler(actor, event) {
 
     // Other bindings are only available when the overview is up and
     // no modal dialog is present.
-    if (!overview.visible || modalCount > 1)
+    if (!overview.visible || _modalCount > 1)
         return false;
 
     // This isn't a Meta.KeyBindingAction yet
@@ -566,8 +564,8 @@ function _globalKeyPressHandler(actor, event) {
 }
 
 function _findModal(actor) {
-    for (let i = 0; i < modalActorFocusStack.length; i++) {
-        if (modalActorFocusStack[i].actor == actor)
+    for (let i = 0; i < _modalActorFocusStack.length; i++) {
+        if (_modalActorFocusStack[i].actor == actor)
             return i;
     }
     return -1;
@@ -597,7 +595,7 @@ function pushModal(actor, timestamp) {
     if (timestamp == undefined)
         timestamp = global.get_current_time();
 
-    if (modalCount == 0) {
+    if (_modalCount == 0) {
         if (!global.begin_modal(timestamp)) {
             log('pushModal: invocation of begin_modal failed');
             return false;
@@ -606,11 +604,11 @@ function pushModal(actor, timestamp) {
 
     global.set_stage_input_mode(Shell.StageInputMode.FULLSCREEN);
 
-    modalCount += 1;
+    _modalCount += 1;
     let actorDestroyId = actor.connect('destroy', function() {
         let index = _findModal(actor);
         if (index >= 0)
-            modalActorFocusStack.splice(index, 1);
+            _modalActorFocusStack.splice(index, 1);
     });
     let curFocus = global.stage.get_key_focus();
     let curFocusDestroyId;
@@ -618,10 +616,10 @@ function pushModal(actor, timestamp) {
         curFocusDestroyId = curFocus.connect('destroy', function() {
             let index = _findModal(actor);
             if (index >= 0)
-                modalActorFocusStack[index].actor = null;
+                _modalActorFocusStack[index].actor = null;
         });
     }
-    modalActorFocusStack.push({ actor: actor,
+    _modalActorFocusStack.push({ actor: actor,
                                 focus: curFocus,
                                 destroyId: actorDestroyId,
                                 focusDestroyId: curFocusDestroyId });
@@ -656,28 +654,28 @@ function popModal(actor, timestamp) {
         throw new Error('incorrect pop');
     }
 
-    modalCount -= 1;
+    _modalCount -= 1;
 
-    let record = modalActorFocusStack[focusIndex];
+    let record = _modalActorFocusStack[focusIndex];
     record.actor.disconnect(record.destroyId);
 
-    if (focusIndex == modalActorFocusStack.length - 1) {
+    if (focusIndex == _modalActorFocusStack.length - 1) {
         if (record.focus)
             record.focus.disconnect(record.focusDestroyId);
         global.stage.set_key_focus(record.focus);
     } else {
-        let t = modalActorFocusStack[modalActorFocusStack.length - 1];
+        let t = _modalActorFocusStack[_modalActorFocusStack.length - 1];
         if (t.focus)
             t.focus.disconnect(t.focusDestroyId);
         // Remove from the middle, shift the focus chain up
-        for (let i = modalActorFocusStack.length - 1; i > focusIndex; i--) {
-            modalActorFocusStack[i].focus = modalActorFocusStack[i - 1].focus;
-            modalActorFocusStack[i].focusDestroyId = modalActorFocusStack[i - 1].focusDestroyId;
+        for (let i = _modalActorFocusStack.length - 1; i > focusIndex; i--) {
+            _modalActorFocusStack[i].focus = _modalActorFocusStack[i - 1].focus;
+            _modalActorFocusStack[i].focusDestroyId = _modalActorFocusStack[i - 1].focusDestroyId;
         }
     }
-    modalActorFocusStack.splice(focusIndex, 1);
+    _modalActorFocusStack.splice(focusIndex, 1);
 
-    if (modalCount > 0)
+    if (_modalCount > 0)
         return;
 
     global.end_modal(timestamp);
@@ -685,18 +683,18 @@ function popModal(actor, timestamp) {
 }
 
 function createLookingGlass() {
-    if (lookingGlass == null) {
-        lookingGlass = new LookingGlass.LookingGlass();
-        lookingGlass.slaveTo(panel.actor);
+    if (_lookingGlass == null) {
+        _lookingGlass = new LookingGlass.LookingGlass();
+        _lookingGlass.slaveTo(panel.actor);
     }
-    return lookingGlass;
+    return _lookingGlass;
 }
 
 function getRunDialog() {
-    if (runDialog == null) {
-        runDialog = new RunDialog.RunDialog();
+    if (_runDialog == null) {
+        _runDialog = new RunDialog.RunDialog();
     }
-    return runDialog;
+    return _runDialog;
 }
 
 /**
