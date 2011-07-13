@@ -221,7 +221,6 @@ Keyboard.prototype = {
         this._setupKeyboard();
 
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
-        this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
 
         Main.layoutManager.bottomBox.add_actor(this.actor);
         this._reposition();
@@ -328,10 +327,6 @@ Keyboard.prototype = {
     _reposition: function () {
         let primary = Main.layoutManager.primaryMonitor;
         this.actor.height = primary.height / 3;
-    },
-
-    _queueReposition: function () {
-     //   Meta.later_add(Meta.LaterType.BEFORE_REDRAW, Lang.bind(this, function () { this._reposition(); }));
     },
 
     _addKeys: function () {
