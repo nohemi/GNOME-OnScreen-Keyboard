@@ -60,7 +60,7 @@ let keyboard = null;
 let layoutManager = null;
 
 let _runDialog = null;
-let _lookingGlass = null;
+let lookingGlass = null;
 let _recorder = null;
 let _modalCount = 0;
 let _modalActorFocusStack = [];
@@ -146,11 +146,11 @@ function start() {
     overview = new Overview.Overview();
     panel = new Panel.Panel();
     messageTray = new MessageTray.MessageTray();
+    keyboard = new Keyboard.Keyboard();
     Main.emit('main-ui-initialized');
 
     // Now the rest of the JS modules (arbitrarily in alphabetical
     // order).
-    keyboard = new Keyboard.Keyboard();
     magnifier = new Magnifier.Magnifier();
     notificationDaemon = new NotificationDaemon.NotificationDaemon();
     placesManager = new PlaceDisplay.PlacesManager();
@@ -698,11 +698,11 @@ function popModal(actor, timestamp) {
 }
 
 function createLookingGlass() {
-    if (_lookingGlass == null) {
-        _lookingGlass = new LookingGlass.LookingGlass();
-        _lookingGlass.slaveTo(panel.actor);
+    if (lookingGlass == null) {
+        lookingGlass = new LookingGlass.LookingGlass();
+        lookingGlass.slaveTo(panel.actor);
     }
-    return _lookingGlass;
+    return lookingGlass;
 }
 
 function getRunDialog() {

@@ -1,5 +1,6 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
+const Clutter = imports.gi.Clutter;
 const Lang = imports.lang;
 const Signals = imports.signals;
 const St = imports.gi.St;
@@ -18,16 +19,41 @@ LayoutManager.prototype = {
         this.primaryMonitor = null;
         this.primaryIndex = -1;
         this._hotCorners = [];
+        this.bottomBox = new Clutter.Group();
+        this.traySummoned = true;
 
         global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
         this._updateMonitors();
 
+        Main.connect('layout-initialized', Lang.bind(this, this._initChrome));
+
         Main.connect('main-ui-initialized', Lang.bind(this, this._finishInit));
+    },
+
+    _initChrome: function() {
+        Main.chrome.addActor(this.bottomBox, { affectsStruts: false,
+                                               visibleInFullscreen: true });
     },
 
     // _updateHotCorners needs access to Main.panel
     _finishInit: function() {
         this._updateHotCorners();
+
+        Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._updateForKeyboard));
+        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
+    },
+
+    _updateForKeyboard: function () {
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        if (Main.keyboard.actor.visible)
+            this.bottomBox.y = bottom - Main.keyboard.actor.height;
+        else
+            this.bottomBox.y = bottom;
+    },
+
+    updateForTray: function () {
+        this.traySummoned = !this.traySummoned;
+        Main.messageTray.updateState();
     },
 
     _updateMonitors: function() {
@@ -54,6 +80,9 @@ LayoutManager.prototype = {
         }
         this.primaryMonitor = this.monitors[this.primaryIndex];
         this.bottomMonitor = this.monitors[this.bottomIndex];
+
+        this.bottomBox.set_position(0, this.bottomMonitor.y + this.bottomMonitor.height);
+        this.bottomBox.width = this.bottomMonitor.width;
     },
 
     _updateHotCorners: function() {

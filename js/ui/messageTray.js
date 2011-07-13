@@ -1321,9 +1321,9 @@ MessageTray.prototype = {
         this._notificationRemoved = false;
         this._reNotifyAfterHideNotification = null;
 
-        Main.chrome.addActor(this.actor, { affectsStruts: false,
-                                           visibleInFullscreen: true });
+        Main.layoutManager.bottomBox.add_actor(this.actor);
         Main.chrome.trackActor(this._notificationBin);
+        Main.chrome.trackActor(this._summaryBin);
         Main.chrome.trackActor(this._summaryBoxPointer.actor);
 
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._setSizePosition));
@@ -1364,7 +1364,7 @@ MessageTray.prototype = {
     _setSizePosition: function() {
         let monitor = Main.layoutManager.bottomMonitor;
         this.actor.x = monitor.x;
-        this.actor.y = monitor.y + monitor.height - 1;
+        this.actor.y = -1;
         this.actor.width = monitor.width;
         this._notificationBin.x = 0;
         this._notificationBin.width = monitor.width;
@@ -1842,8 +1842,9 @@ MessageTray.prototype = {
         }
 
         // Summary
-        let summarySummoned = this._pointerInSummary || this._overviewVisible ||
-                              (Main.keyboard.actor.visible && !Main.keyboard.floating);
+        let keyboardVisible = Main.keyboard.actor.visible;
+        let traySummoned = Main.layoutManager.traySummoned && keyboardVisible;
+        let summarySummoned = this._pointerInSummary || (this._overviewVisible && !keyboardVisible) || traySummoned;
         let summaryPinned = this._summaryTimeoutId != 0 || this._pointerInTray || summarySummoned || this._locked;
         let summaryHovered = this._pointerInTray || this._pointerInSummary;
         let summaryVisibleWithNoHover = (this._overviewVisible || this._locked) && !summaryHovered;
@@ -1908,9 +1909,9 @@ MessageTray.prototype = {
         let trayShouldBeVisible = (!notificationsDone ||
                                    this._summaryState == State.SHOWING ||
                                    this._summaryState == State.SHOWN);
-        if (!trayIsVisible && trayShouldBeVisible && Main.keyboard.showTray)
+        if (!trayIsVisible && trayShouldBeVisible)
             this._showTray();
-        else if (trayIsVisible && !trayShouldBeVisible || !Main.keyboard.showTray)
+        else if (trayIsVisible && !trayShouldBeVisible)
             this._hideTray();
     },
 
@@ -1937,22 +1938,16 @@ MessageTray.prototype = {
     },
 
     _showTray: function() {
-        let monitor = Main.layoutManager.bottomMonitor;
-        let y = monitor.y + monitor.height - this.actor.height;
-        if (Main.keyboard.actor.visible && !Main.keyboard.floating)
-            y -= Main.keyboard.actor.height;
         this._tween(this.actor, '_trayState', State.SHOWN,
-                    { y: y,
+                    { y: -this.actor.height,
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
     },
 
     _hideTray: function() {
-        let monitor = Main.layoutManager.bottomMonitor;
-        let y = monitor.y + monitor.height - 1;
         this._tween(this.actor, '_trayState', State.HIDDEN,
-                    { y: y,
+                    { y: -1,
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });

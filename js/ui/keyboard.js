@@ -223,9 +223,7 @@ Keyboard.prototype = {
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
         this.actor.connect('allocation-changed', Lang.bind(this, this._queueReposition));
 
-        Main.chrome.addActor(this.actor, { visibleInFullscreen: true,
-                                           affectsStruts: false });
-        this.showTray = true;
+        Main.layoutManager.bottomBox.add_actor(this.actor);
         this._reposition();
         this._display();
     },
@@ -328,8 +326,6 @@ Keyboard.prototype = {
 
     _reposition: function () {
         let primary = Main.layoutManager.primaryMonitor;
-        this.actor.x = primary.x;
-        this.actor.y = primary.y + primary.height - this.actor.height;
         this.actor.height = primary.height / 3;
     },
 
@@ -366,15 +362,10 @@ Keyboard.prototype = {
         trayButton.width = 0;
         trayButton.height = 0;
         trayButton.key_width = 1;
-        trayButton.connect('button-press-event', Lang.bind(this, this._onTrayClicked));
+        trayButton.connect('button-press-event', Lang.bind(this, function () {
+            Main.layoutManager.updateForTray();
+        }));
         return trayButton;
-    },
-
-    _onTrayClicked: function () {
-        // Toggle effect tray icon has on message tray
-        this.showTray = !this.showTray;
-        Main.messageTray.updateState();
-
     },
 
     _addRows : function (keys, layout) {
@@ -504,7 +495,6 @@ Keyboard.prototype = {
         }
         this.actor.hide();
         this._current_page.hide();
-        this.showTray = true;
     },
 
     // Window placement method
