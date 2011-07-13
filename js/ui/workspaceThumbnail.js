@@ -527,7 +527,15 @@ ThumbnailsBox.prototype = {
             this._stateCounts[ThumbnailState[key]] = 0;
 
         // The "porthole" is the portion of the screen that we show in the workspaces
-        this._porthole = Main.layoutManager.primaryContentArea;
+        let panelHeight = Main.panel.actor.height;
+        let monitor = Main.layoutManager.primaryMonitor;
+        this._porthole = {
+            x: monitor.x,
+            y: monitor.y + panelHeight,
+            width: monitor.width,
+            height: monitor.height - panelHeight
+        };
+
         this.addThumbnails(0, global.screen.n_workspaces);
     },
 

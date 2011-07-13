@@ -450,20 +450,16 @@ Overview.prototype = {
         let primary = Main.layoutManager.primaryMonitor;
         let rtl = (St.Widget.get_default_direction () == St.TextDirection.RTL);
 
-        let primary = Main.layoutManager.primaryMonitor;
-        let content = Main.layoutManager.overviewContentArea;
-        let rtl = (St.Widget.get_default_direction () == St.TextDirection.RTL);
-
         this._group.set_position(primary.x, primary.y);
         this._group.set_size(primary.width, primary.height);
 
-        this._coverPane.set_position(content.x, content.y);
-        this._coverPane.set_size(content.width, content.height);
+        this._coverPane.set_position(primary.x, primary.y);
+        this._coverPane.set_size(primary.width, primary.height);
 
         let dashWidth = Math.round(DASH_SPLIT_FRACTION * primary.width);
         let viewWidth = primary.width - dashWidth - this._spacing;
-        let viewHeight = content.height - 2 * this._spacing;
-        let viewY = content.y + this._spacing;
+        let viewHeight = primary.height - 2 * this._spacing;
+        let viewY = primary.y + this._spacing;
         let viewX = rtl ? 0 : dashWidth + this._spacing;
 
         // Set the dash's x position - y is handled by a constraint

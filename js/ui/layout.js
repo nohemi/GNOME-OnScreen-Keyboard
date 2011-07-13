@@ -1,7 +1,6 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 const Lang = imports.lang;
-const Meta = imports.gi.Meta;
 const Signals = imports.signals;
 const St = imports.gi.St;
 
@@ -29,12 +28,6 @@ LayoutManager.prototype = {
     // _updateHotCorners needs access to Main.panel
     _finishInit: function() {
         this._updateHotCorners();
-
-        Main.panel.actor.connect('allocation-changed', Lang.bind(this, this._allocationChanged));
-        Main.messageTray.actor.connect('allocation-changed', Lang.bind(this, this._allocationChanged));
-        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._allocationChanged));
-        Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._visibilityChanged));
-        this._updateContentArea();
     },
 
     _updateMonitors: function() {
@@ -61,30 +54,6 @@ LayoutManager.prototype = {
         }
         this.primaryMonitor = this.monitors[this.primaryIndex];
         this.bottomMonitor = this.monitors[this.bottomIndex];
-    },
-
-    _updateContentArea: function() {
-        let changed = false;
-
-        let primaryContentArea = new Meta.Rectangle(this.primaryMonitor);
-        primaryContentArea.y += this._panelHeight;
-        primaryContentArea.height -= this._panelHeight;
-        if (!this.primaryContentArea.equal(primaryContentArea)) {
-            this.primaryContentArea = primaryContentArea;
-            changed = true;
-        }
-
-        let overviewContentArea = new Meta.Rectangle(this.primaryContentArea);
-        overviewContentArea.height -= this._trayHeight;
-        if (!this.overviewContentArea.equal(overviewContentArea)) {
-            this.overviewContentArea = overviewContentArea;
-            changed = true;
-        }
-
-        if (changed) {
-            this.emit('content-area-changed');
-            this.emit('monitors-changed'); // FIXME
-        }
     },
 
     _updateHotCorners: function() {
@@ -144,31 +113,8 @@ LayoutManager.prototype = {
     _monitorsChanged: function() {
         this._updateMonitors();
         this._updateHotCorners();
-        this._updateContentArea();
 
         this.emit('monitors-changed');
-    },
-
-    _allocationChanged: function(actor, box, flags) {
-        let height = box.y2 - box.y1;
-
-        if (actor == Main.panel.actor)
-            this._panelHeight = height;
-        else if (actor == Main.messageTray.actor)
-            this._trayHeight = height;
-        else if (actor == Main.keyboard.actor && Main.keyboard.actor.visible)
-            this._keyboardHeight = height;
-
-        this._updateContentArea();
-    },
-
-    _visibilityChanged: function(actor) {
-        if (Main.keyboard.actor.visible)
-            this._keyboardHeight = Main.keyboard.actor.height;
-        else
-            this._keyboardHeight = 0;
-
-        this._updateContentArea();
     },
 
     _isAboveOrBelowPrimary: function(monitor) {
