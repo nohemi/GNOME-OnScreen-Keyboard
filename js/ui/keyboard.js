@@ -256,8 +256,8 @@ Keyboard.prototype = {
 
         this._showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
         this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
-        this.floating = this._keyboardSettings.get_boolean(ENABLE_FLOAT);
-        if (this.floating) {
+        this._floating = this._keyboardSettings.get_boolean(ENABLE_FLOAT);
+        if (this._floating) {
              this._floatId = this.actor.connect('button-press-event', Lang.bind(this, this._startDragging));
              this._dragging = false;
         }
@@ -436,7 +436,7 @@ Keyboard.prototype = {
                                    - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
                     child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
                                    - 2 * this._padding) / this._numOfVertKeys;
-                    if (this.floating) {
+                    if (this._floating) {
                         child.height = Math.min(child.width, child.height);
                         child.width = child.height * child.key_width;
                     }
@@ -535,7 +535,7 @@ Keyboard.prototype = {
     },
 
     _setLocation: function (x, y) {
-        if (this.floating)
+        if (this._floating)
             this._updatePosition(x, y);
         else {
             if (y >= 2 * this.actor.height)
