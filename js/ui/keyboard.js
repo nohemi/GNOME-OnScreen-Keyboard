@@ -361,14 +361,16 @@ Keyboard.prototype = {
         }));
 
         Main.overview.connect('showing', Lang.bind(this, function () {
-            this._trayButton.disconnect(this._trayPressId);
+            if (this._trayPressId != 0)
+                this._trayButton.disconnect(this._trayPressId);
             this._trayPressId = 0;
             this._trayButton.add_style_pseudo_class('grayed');
         }));
         Main.overview.connect('hiding', Lang.bind(this, function () {
-            this._trayPressId = this._trayButton.connect('button-press-event', Lang.bind(this, function () {
-                Main.layoutManager.updateForTray();
-            }));
+            if (this._trayPressId == 0)
+                this._trayPressId = this._trayButton.connect('button-press-event', Lang.bind(this, function () {
+                    Main.layoutManager.updateForTray();
+                }));
             this._trayButton.remove_style_pseudo_class('grayed');
         }));
     },
