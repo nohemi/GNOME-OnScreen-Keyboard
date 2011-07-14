@@ -365,7 +365,7 @@ Keyboard.prototype = {
     },
 
     _addRows : function (keys, layout) {
-        let keyboard_row = new St.BoxLayout ({ style_class: 'keyboard-row' });
+        let keyboard_row = new St.BoxLayout();
         for (let i = 0; i < keys.length; ++i) {
             let children = keys[i].get_children();
             let right_box = new St.BoxLayout({ style_class: 'keyboard-row' });
@@ -387,8 +387,8 @@ Keyboard.prototype = {
                     right_box.add(this._getTrayIcon());
                 }
             }
-            keyboard_row.add(left_box, { expand: true, x_fill: true});
-            keyboard_row.add(right_box, { expand: true, x_fill: true});
+            keyboard_row.add(left_box, { expand: true, x_fill: false, x_align: St.Align.START });
+            keyboard_row.add(right_box, { expand: true, x_fill: false, x_align: St.Align.END });
         }
         layout.add(keyboard_row);
     },
@@ -420,10 +420,10 @@ Keyboard.prototype = {
             if (this._horizontalSpacing == 0)
                 keyboard_row.connect('style-changed', Lang.bind(this, this._onStyleChanged));
 
-            this._onStyleChanged(keyboard_row);
             this._onStyleChanged(this._current_page);
             let boxes = keyboard_row.get_children();
             for (let j = 0; j < boxes.length; ++j) {
+                this._onStyleChanged(boxes[j]);
                 let keys = boxes[j].get_children();
                 for (let k = 0; k < keys.length; ++k) {
                     let child = keys[k];
