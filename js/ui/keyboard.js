@@ -405,9 +405,14 @@ Keyboard.prototype = {
         layout.add(keyboard_row);
     },
 
-    _onPrefsClick: function () {
+    _manageTray: function () {
         this.createSource();
+        Main.layoutManager.updateForTray();
+    },
+
+    _onPrefsClick: function () {
         this.hide();
+        this._manageTray();
     },
 
     _loadRows : function (level, layout) {
@@ -562,8 +567,8 @@ Keyboard.prototype = {
             log(this._currentWindow.y);
             this._currentWindow = null;
         }
-        this.createSource();
         this.hide();
+        this._manageTray();
     },
 
     SetCursorLocation: function(x, y, w, h) {

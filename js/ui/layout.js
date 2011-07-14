@@ -52,8 +52,12 @@ LayoutManager.prototype = {
     },
 
     updateForTray: function () {
-        this.traySummoned = !this.traySummoned;
-        Main.messageTray.updateState();
+        if (Main.keyboard.actor.visible) {
+            this.traySummoned = !this.traySummoned;
+            Main.messageTray.updateState();
+        }
+        else
+            this.traySummoned = true;
     },
 
     _updateMonitors: function() {

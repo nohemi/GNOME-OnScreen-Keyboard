@@ -1844,7 +1844,7 @@ MessageTray.prototype = {
         // Summary
         let keyboardVisible = Main.keyboard.actor.visible;
         let traySummoned = Main.layoutManager.traySummoned && keyboardVisible;
-        let summarySummoned = this._pointerInSummary || this._overviewVisible || traySummoned;
+        let summarySummoned = (this._pointerInSummary && !keyboardVisible) || this._overviewVisible || traySummoned;
         let summaryPinned = this._summaryTimeoutId != 0 || this._pointerInTray || summarySummoned || this._locked;
         let summaryHovered = this._pointerInTray || this._pointerInSummary;
         let summaryVisibleWithNoHover = (this._overviewVisible || this._locked) && !summaryHovered;
@@ -1874,7 +1874,7 @@ MessageTray.prototype = {
                 this._hideSummary();
             else if (summaryVisibleWithNoHover && !summaryNotificationIsForExpandedSummaryItem)
                 // If we are hiding the summary, we'll collapse the expanded summary item when we are done
-                // so that there is no animation. However, we should collapse the expanded summary item
+                // so that there is no animation. However, we should collapse the expanded summary ite(m
                 // if the summary is visible, but not hovered over, and the summary notification for the
                 // expanded summary item is not being shown.
                 this._setExpandedSummaryItem(null);
