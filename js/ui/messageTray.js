@@ -1943,6 +1943,7 @@ MessageTray.prototype = {
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
+        Main.layoutManager.updateClip();
     },
 
     _hideTray: function() {
@@ -1951,6 +1952,7 @@ MessageTray.prototype = {
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
+        Main.layoutManager.updateClip();
     },
 
     _showNotification: function() {

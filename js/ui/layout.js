@@ -20,6 +20,7 @@ LayoutManager.prototype = {
         this.primaryIndex = -1;
         this._hotCorners = [];
         this.bottomBox = new Clutter.Group();
+        this._clipSet = true;
         this.traySummoned = true;
 
         global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
@@ -58,6 +59,15 @@ LayoutManager.prototype = {
         }
         else
             this.traySummoned = true;
+    },
+
+    updateClip: function () {
+        this._clipSet = Main.keyboard.actor.visible && !this._clipSet;
+        if (this._clipSet)
+            Main.messageTray.actor.set_clip(0, 0, 0, 0);
+        else
+            Main.messageTray.actor.remove_clip();
+
     },
 
     _updateMonitors: function() {
