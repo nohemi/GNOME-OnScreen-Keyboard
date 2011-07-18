@@ -560,7 +560,6 @@ Keyboard.prototype = {
     Hide: function() {
         if (this._currentWindow) {
             this._currentWindow.move_frame(true, this._currentWindow.x, this._currentWindow.y);
-            log(this._currentWindow.y);
             this._currentWindow = null;
         }
         this.hide();
