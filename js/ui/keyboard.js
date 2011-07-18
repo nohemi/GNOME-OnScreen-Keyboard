@@ -354,25 +354,22 @@ Keyboard.prototype = {
     },
 
     _getTrayIcon: function () {
-        this._trayButton = new St.Button ({ label: "tray", style_class: 'keyboard-key' });
-        this._trayButton.key_width = 1;
-        this._trayPressId = this._trayButton.connect('button-press-event', Lang.bind(this, function () {
+        let trayButton = new St.Button ({ label: "tray", style_class: 'keyboard-key' });
+        trayButton.key_width = 1;
+        trayButton.connect('button-press-event', Lang.bind(this, function () {
             Main.layoutManager.updateForTray();
         }));
 
         Main.overview.connect('showing', Lang.bind(this, function () {
-            if (this._trayPressId != 0)
-                this._trayButton.disconnect(this._trayPressId);
-            this._trayPressId = 0;
-            this._trayButton.add_style_pseudo_class('grayed');
+            trayButton.reactive = false;
+            trayButton.add_style_pseudo_class('grayed');
         }));
         Main.overview.connect('hiding', Lang.bind(this, function () {
-            if (this._trayPressId == 0)
-                this._trayPressId = this._trayButton.connect('button-press-event', Lang.bind(this, function () {
-                    Main.layoutManager.updateForTray();
-                }));
-            this._trayButton.remove_style_pseudo_class('grayed');
+            trayButton.reactive = true;
+            trayButton.remove_style_pseudo_class('grayed');
         }));
+
+        return trayButton;
     },
 
     _addRows : function (keys, layout) {
@@ -395,8 +392,7 @@ Keyboard.prototype = {
                     key.connect('key-released', Lang.bind(this, this._onPrefsClick));
 
                     // Add new key for hiding message tray
-                    this._getTrayIcon();
-                    right_box.add(this._trayButton);
+                    right_box.add(this._getTrayIcon());
                 }
             }
             keyboard_row.add(left_box, { expand: true, x_fill: false, x_align: St.Align.START });

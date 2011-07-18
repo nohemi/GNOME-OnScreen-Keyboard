@@ -1701,6 +1701,11 @@ StTooltip StLabel {
     color: white;
 }
 
+.keyboard-key:grayed {
+   color: #808080;
+   border-color: #808080;
+}
+
 .keyboard-key:checked,
 .keyboard-key:hover {
     background: #303030;
