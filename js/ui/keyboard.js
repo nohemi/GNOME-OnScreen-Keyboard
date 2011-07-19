@@ -213,7 +213,7 @@ Keyboard.prototype = {
         DBus.session.exportObject('/org/gnome/Caribou/Keyboard', this);
         DBus.session.acquire_name('org.gnome.Caribou.Keyboard', 0, null, null);
 
-        this.actor = new St.BoxLayout({ name: 'keyboard', vertical: false, reactive: true });
+        this.actor = new St.BoxLayout({ name: 'keyboard', vertical: true, reactive: true });
 
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
         this._keyboardSettings.connect('changed', Lang.bind(this, this._display));
@@ -327,6 +327,7 @@ Keyboard.prototype = {
     _reposition: function () {
         let primary = Main.layoutManager.primaryMonitor;
         this.actor.height = primary.height / 3;
+        this.actor.width = primary.width;
     },
 
     _addKeys: function () {
@@ -344,7 +345,7 @@ Keyboard.prototype = {
                                                  vertical: true });
                  this._loadRows(level, layout);
                  layers[lname] = layout;
-                 this.actor.add(layout);
+                 this.actor.add(layout, { x_fill: false });
 
                  layout.hide();
              }
@@ -444,10 +445,8 @@ Keyboard.prototype = {
                                    - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
                     child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
                                    - 2 * this._padding) / this._numOfVertKeys;
-                    if (this._floating) {
-                        child.height = Math.min(child.width, child.height);
-                        child.width = child.height * child.key_width;
-                    }
+                    child.height = Math.min(child.width, child.height);
+                    child.width = child.height * child.key_width;
                     child.draggable = this._draggable;
                     if (child._extended_keys) {
                         let extended_keys = child._extended_keys.get_children();
