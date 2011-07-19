@@ -220,10 +220,9 @@ Keyboard.prototype = {
 
         this._setupKeyboard();
 
-        Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._reposition));
+        Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._redraw));
 
         Main.layoutManager.bottomBox.add_actor(this.actor);
-        this._reposition();
         this._display();
     },
 
@@ -264,7 +263,6 @@ Keyboard.prototype = {
             this.actor.disconnect(this._floatId);
         if (this._showKeyboard) {
             this.show();
-            this._reposition();
         } else {
             this.hide();
             this.destroySource();
@@ -315,21 +313,6 @@ Keyboard.prototype = {
 
     },
 
-    _onStyleChanged: function (actor) {
-        if (actor.style_class == 'keyboard-row')
-            this._horizontalSpacing = actor.get_theme_node().get_length('spacing');
-        if (actor.style_class == 'keyboard-layout') {
-            this._verticalSpacing = actor.get_theme_node().get_length('spacing');
-            this._padding = actor.get_theme_node().get_length('padding');
-        }
-    },
-
-    _reposition: function () {
-        let primary = Main.layoutManager.primaryMonitor;
-        this.actor.height = primary.height / 3;
-        this.actor.width = primary.width;
-    },
-
     _addKeys: function () {
         let groups = this._keyboard.get_groups();
         for (let i = 0; i < groups.length; ++i) {
@@ -351,6 +334,7 @@ Keyboard.prototype = {
              }
              this._groups[gname] = layers;
         }
+
         this._setActiveLayer();
     },
 
@@ -424,36 +408,42 @@ Keyboard.prototype = {
     },
 
     _redraw: function () {
-        if (this._verticalSpacing == 0)
-            this._current_page.connect('style-changed', Lang.bind(this, this._onStyleChanged));
+        let monitor = Main.layoutManager.bottomMonitor;
+        let maxHeight = monitor.height / 3;
+        this.actor.width = monitor.width;
 
-        let primary_monitor = Main.layoutManager.primaryMonitor;
+        let layout = this._current_page;
+        let verticalSpacing = layout.get_theme_node().get_length('spacing');
+        let padding = layout.get_theme_node().get_length('padding');
+
+        let box = layout.get_children()[0].get_children()[0];
+        let horizontalSpacing = box.get_theme_node().get_length('spacing');
+        let allHorizontalSpacing = (this._numOfHorizKeys - 1) * horizontalSpacing;
+        let keyWidth = Math.floor((this.actor.width - allHorizontalSpacing - 2 * padding) / this._numOfHorizKeys);
+
+        let allVerticalSpacing = (this._numOfVertKeys - 1) * verticalSpacing;
+        let keyHeight = Math.floor((maxHeight - allVerticalSpacing - 2 * padding) / this._numOfVertKeys);
+
+        let keySize = Math.min(keyWidth, keyHeight);
+        this.actor.height = keySize * this._numOfVertKeys + allVerticalSpacing + 2 * this._padding;
+
         let rows = this._current_page.get_children();
         for (let i = 0; i < rows.length; ++i) {
             let keyboard_row = rows[i];
-            if (this._horizontalSpacing == 0)
-                keyboard_row.connect('style-changed', Lang.bind(this, this._onStyleChanged));
-
-            this._onStyleChanged(this._current_page);
             let boxes = keyboard_row.get_children();
             for (let j = 0; j < boxes.length; ++j) {
-                this._onStyleChanged(boxes[j]);
                 let keys = boxes[j].get_children();
                 for (let k = 0; k < keys.length; ++k) {
                     let child = keys[k];
-                    child.width = (primary_monitor.width - (this._numOfHorizKeys - 1) * this._horizontalSpacing
-                                   - 2 * this._padding)/ this._numOfHorizKeys * child.key_width;
-                    child.height = (primary_monitor.height / 3 - (this._numOfVertKeys - 1) * this._verticalSpacing
-                                   - 2 * this._padding) / this._numOfVertKeys;
-                    child.height = Math.min(child.width, child.height);
-                    child.width = child.height * child.key_width;
+                    child.width = keySize * child.key_width;
+                    child.height = keySize;
                     child.draggable = this._draggable;
                     if (child._extended_keys) {
                         let extended_keys = child._extended_keys.get_children();
                         for (let n = 0; n < extended_keys.length; ++n) {
                             let extended_key = extended_keys[n];
-                            extended_key.width = child.width;
-                            extended_key.height = child.height;
+                            extended_key.width = keySize;
+                            extended_key.height = keySize;
                             extended_key.draggable = this._draggable;
                         }
                     }
