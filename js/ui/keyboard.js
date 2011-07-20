@@ -495,20 +495,19 @@ Keyboard.prototype = {
         this._redraw();
         this.actor.show();
         Tweener.addTween(this.actor,
-                         { value: this.actor.height,
-                           time: 0.2,
+                         { y: 0,
+                           time: 0.5,
                            transition: 'easeOutQuad',
                          });
     },
 
     hide: function () {
         Tweener.addTween(this.actor,
-                          { value: -1,
-                            time: 0.2,
-                            transition: 'easeOutQuad',
-                            onCompleteScope: this,
-                            onComplete: this.actor.hide()
+                          { y: this.actor.height -1,
+                            time: 0.5,
+                            transition: 'easeOutQuad'
                           });
+        this.actor.hide();
     },
 
     // Window placement method
