@@ -45,29 +45,28 @@ LayoutManager.prototype = {
         this._updateHotCorners();
 
         this.topBox.height = Main.messageTray.actor.height;
+        this.keyboardVisible = Main.keyboard.actor.visible;
         Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
     },
 
     showKeyboard: function () {
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
-        Tweener.addTween(Main.keyboard.actor,
-                         { y: 0,
+        Tweener.addTween(this.bottomBox,
+                         { y: bottom - Main.keyboard.actor.height,
                            time: 0.5,
                            transition: 'easeOutQuad',
                          });
-        this.bottomBox.y = bottom - Main.keyboard.actor.height;
         this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
         this.keyboardVisible = true;
     },
 
     hideKeyboard: function () {
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
-        Tweener.addTween(Main.keyboard.actor,
-                         { y: Main.keyboard.actor.height -1,
+        Tweener.addTween(this.bottomBox,
+                         { y: bottom,
                            time: 0.5,
                            transition: 'easeOutQuad'
                          });
-        this.bottomBox.y = bottom;
         this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
         this.keyboardVisible = false;
     },
@@ -77,7 +76,6 @@ LayoutManager.prototype = {
     // init process.
     _updateForKeyboard: function () {
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
-        this.keyboardVisible = Main.keyboard.actor.visible;
         if (this.keyboardVisible)
             this.bottomBox.y = bottom - Main.keyboard.actor.height;
         else
