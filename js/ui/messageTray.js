@@ -1842,7 +1842,7 @@ MessageTray.prototype = {
         }
 
         // Summary
-        let keyboardVisible = Main.keyboard.actor.visible;
+        let keyboardVisible = Main.layoutManager.keyboardVisible;
         let traySummoned = Main.layoutManager.traySummoned && keyboardVisible;
         let summarySummoned = (this._pointerInSummary && !keyboardVisible) || this._overviewVisible || traySummoned;
         let summaryPinned = this._summaryTimeoutId != 0 || this._pointerInTray || summarySummoned || this._locked;

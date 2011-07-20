@@ -263,9 +263,10 @@ Keyboard.prototype = {
         else
             this.actor.disconnect(this._floatId);
         if (this._showKeyboard) {
-            this.show();
+            this._redraw();
+            this.actor.show();
         } else {
-            this.hide();
+            this.actor.hide();
             this.destroySource();
         }
     },
@@ -493,13 +494,11 @@ Keyboard.prototype = {
 
     show: function () {
         this._redraw();
-        this.actor.show();
         Main.layoutManager.showKeyboard();
     },
 
     hide: function () {
         Main.layoutManager.hideKeyboard();
-        this.actor.hide();
     },
 
     // Window placement method

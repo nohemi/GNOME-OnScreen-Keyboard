@@ -45,7 +45,7 @@ LayoutManager.prototype = {
         this._updateHotCorners();
 
         this.topBox.height = Main.messageTray.actor.height;
-        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this.showKeyboard));
+        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
     },
 
     showKeyboard: function () {
@@ -69,10 +69,24 @@ LayoutManager.prototype = {
                          });
         this.bottomBox.y = bottom;
         this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
+        this.keyboardVisible = false;
+    },
+
+    // Keyboard is not set until after call to Keyboard.Keyboard() therefore
+    // we need a way to distinguish whether the keyboard has been set during
+    // init process.
+    _updateForKeyboard: function () {
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        this.keyboardVisible = Main.keyboard.actor.visible;
+        if (this.keyboardVisible)
+            this.bottomBox.y = bottom - Main.keyboard.actor.height;
+        else
+            this.bottomBox.y = bottom;
+        this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
     },
 
     updateForTray: function () {
-        if (Main.keyboard.actor.visible) {
+        if (this.keyboardVisible) {
             this.traySummoned = !this.traySummoned;
             Main.messageTray.updateState();
         }
