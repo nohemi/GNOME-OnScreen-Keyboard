@@ -22,7 +22,7 @@ LayoutManager.prototype = {
         this._hotCorners = [];
         this.bottomBox = new Clutter.Group();
         this.topBox = new Clutter.Group({ clip_to_allocation: true });
-        this._clipSet = true;
+        this.bottomBox.add_actor(this.topBox);
         this.traySummoned = true;
 
         global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
@@ -36,8 +36,6 @@ LayoutManager.prototype = {
     _initChrome: function() {
         Main.chrome.addActor(this.bottomBox, { affectsStruts: false,
                                                visibleInFullscreen: true });
-        Main.chrome.addActor(this.topBox, { affectsStruts: false,
-                                               visibleInFullscreen: true });
     },
 
     // _updateHotCorners needs access to Main.panel
@@ -45,6 +43,7 @@ LayoutManager.prototype = {
         this._updateHotCorners();
 
         this.topBox.height = Main.messageTray.actor.height;
+        this.bottomBox.height = Main.keyboard.actor.height + Main.messageTray.actor.height;
         this.keyboardVisible = Main.keyboard.actor.visible;
         Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
     },
@@ -56,7 +55,6 @@ LayoutManager.prototype = {
                            time: 0.5,
                            transition: 'easeOutQuad',
                          });
-        this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
         this.keyboardVisible = true;
     },
 
@@ -67,7 +65,6 @@ LayoutManager.prototype = {
                            time: 0.5,
                            transition: 'easeOutQuad'
                          });
-        this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
         this.keyboardVisible = false;
     },
 
@@ -80,7 +77,7 @@ LayoutManager.prototype = {
             this.bottomBox.y = bottom - Main.keyboard.actor.height;
         else
             this.bottomBox.y = bottom;
-        this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
+        this.topBox.y = -Main.messageTray.actor.height;;
     },
 
     updateForTray: function () {
@@ -88,8 +85,10 @@ LayoutManager.prototype = {
             this.traySummoned = !this.traySummoned;
             Main.messageTray.updateState();
         }
-        else
+        else {
             this.traySummoned = true;
+            this._updateForKeyboard();
+        }
     },
 
     _updateMonitors: function() {
