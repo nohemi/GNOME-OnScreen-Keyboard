@@ -7,6 +7,7 @@ const St = imports.gi.St;
 
 const Main = imports.ui.main;
 const Panel = imports.ui.panel;
+const Tweener = imports.ui.tweener;
 
 function LayoutManager() {
     this._init.apply(this, arguments);
@@ -44,17 +45,29 @@ LayoutManager.prototype = {
         this._updateHotCorners();
 
         this.topBox.height = Main.messageTray.actor.height;
-
-        Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._updateForKeyboard));
-        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
+        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this.showKeyboard));
     },
 
-    _updateForKeyboard: function () {
+    showKeyboard: function () {
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
-        if (Main.keyboard.actor.visible)
-            this.bottomBox.y = bottom - Main.keyboard.actor.height;
-        else
-            this.bottomBox.y = bottom;
+        Tweener.addTween(Main.keyboard.actor,
+                         { y: 0,
+                           time: 0.5,
+                           transition: 'easeOutQuad',
+                         });
+        this.bottomBox.y = bottom - Main.keyboard.actor.height;
+        this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
+        this.keyboardVisible = true;
+    },
+
+    hideKeyboard: function () {
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        Tweener.addTween(Main.keyboard.actor,
+                         { y: Main.keyboard.actor.height -1,
+                           time: 0.5,
+                           transition: 'easeOutQuad'
+                         });
+        this.bottomBox.y = bottom;
         this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
     },
 

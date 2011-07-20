@@ -494,19 +494,11 @@ Keyboard.prototype = {
     show: function () {
         this._redraw();
         this.actor.show();
-        Tweener.addTween(this.actor,
-                         { y: 0,
-                           time: 0.5,
-                           transition: 'easeOutQuad',
-                         });
+        Main.layoutManager.showKeyboard();
     },
 
     hide: function () {
-        Tweener.addTween(this.actor,
-                          { y: this.actor.height -1,
-                            time: 0.5,
-                            transition: 'easeOutQuad'
-                          });
+        Main.layoutManager.hideKeyboard();
         this.actor.hide();
     },
 
