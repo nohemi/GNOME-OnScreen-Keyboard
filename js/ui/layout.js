@@ -20,6 +20,7 @@ LayoutManager.prototype = {
         this.primaryIndex = -1;
         this._hotCorners = [];
         this.bottomBox = new Clutter.Group();
+        this.topBox = new Clutter.Group({ clip_to_allocation: true });
         this._clipSet = true;
         this.traySummoned = true;
 
@@ -34,11 +35,15 @@ LayoutManager.prototype = {
     _initChrome: function() {
         Main.chrome.addActor(this.bottomBox, { affectsStruts: false,
                                                visibleInFullscreen: true });
+        Main.chrome.addActor(this.topBox, { affectsStruts: false,
+                                               visibleInFullscreen: true });
     },
 
     // _updateHotCorners needs access to Main.panel
     _finishInit: function() {
         this._updateHotCorners();
+
+        this.topBox.height = Main.messageTray.actor.height;
 
         Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._updateForKeyboard));
         Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
@@ -50,6 +55,7 @@ LayoutManager.prototype = {
             this.bottomBox.y = bottom - Main.keyboard.actor.height;
         else
             this.bottomBox.y = bottom;
+        this.topBox.y = this.bottomBox.y - Main.messageTray.actor.height;
     },
 
     updateForTray: function () {
@@ -59,15 +65,6 @@ LayoutManager.prototype = {
         }
         else
             this.traySummoned = true;
-    },
-
-    updateClip: function () {
-        this._clipSet = Main.keyboard.actor.visible && !this._clipSet;
-        if (this._clipSet)
-            Main.messageTray.actor.set_clip(0, 0, 0, 0);
-        else
-            Main.messageTray.actor.remove_clip();
-
     },
 
     _updateMonitors: function() {

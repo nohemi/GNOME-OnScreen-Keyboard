@@ -1321,7 +1321,7 @@ MessageTray.prototype = {
         this._notificationRemoved = false;
         this._reNotifyAfterHideNotification = null;
 
-        Main.layoutManager.bottomBox.add_actor(this.actor);
+        Main.layoutManager.topBox.add_actor(this.actor);
         Main.chrome.trackActor(this._notificationBin);
         Main.chrome.trackActor(this._summaryBin);
         Main.chrome.trackActor(this._summaryBoxPointer.actor);
@@ -1943,7 +1943,6 @@ MessageTray.prototype = {
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });
-        Main.layoutManager.updateClip();
     },
 
     _hideTray: function() {
