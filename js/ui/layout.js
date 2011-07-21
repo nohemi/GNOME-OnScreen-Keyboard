@@ -20,7 +20,8 @@ LayoutManager.prototype = {
         this.primaryIndex = -1;
         this._hotCorners = [];
         this.bottomBox = new Clutter.Group();
-        this._clipSet = true;
+        this.topBox = new Clutter.Group({ clip_to_allocation: true });
+        this.bottomBox.add_actor(this.topBox);
         this.traySummoned = true;
 
         global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
@@ -39,6 +40,11 @@ LayoutManager.prototype = {
     // _updateHotCorners needs access to Main.panel
     _finishInit: function() {
         this._updateHotCorners();
+
+        this.topBox.height = Main.messageTray.actor.height;
+        this.bottomBox.height = Main.keyboard.actor.height + Main.messageTray.actor.height;
+
+        this.topBox.y = - Main.messageTray.actor.height;
 
         Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._updateForKeyboard));
         Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
@@ -59,15 +65,6 @@ LayoutManager.prototype = {
         }
         else
             this.traySummoned = true;
-    },
-
-    updateClip: function () {
-        this._clipSet = Main.keyboard.actor.visible && !this._clipSet;
-        if (this._clipSet)
-            Main.messageTray.actor.set_clip(0, 0, 0, 0);
-        else
-            Main.messageTray.actor.remove_clip();
-
     },
 
     _updateMonitors: function() {
