@@ -14,7 +14,6 @@ const St = imports.gi.St;
 const BoxPointer = imports.ui.boxpointer;
 const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
-const PopupMenu = imports.ui.popupMenu;
 
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD = 'show-keyboard';
