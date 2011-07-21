@@ -224,6 +224,7 @@ Keyboard.prototype = {
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._redraw));
 
         Main.layoutManager.bottomBox.add_actor(this.actor);
+        this._initialDisplay = true;
         this._display();
     },
 
@@ -262,13 +263,28 @@ Keyboard.prototype = {
         }
         else
             this.actor.disconnect(this._floatId);
+        if (this._initialDisplay)
+            this._initDisplay();
+        else {
+            if (this._showKeyboard)
+                this.show();
+            else {
+                this.hide();
+                this.destroySource();
+            }
+        }
+    },
+
+    _initDisplay: function (display) {
         if (this._showKeyboard) {
             this._redraw();
             this.actor.show();
-        } else {
+        }
+        else {
             this.actor.hide();
             this.destroySource();
         }
+        this._initialDisplay = false;
     },
 
     _startDragging: function (actor, event) {

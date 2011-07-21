@@ -9,6 +9,13 @@ const Main = imports.ui.main;
 const Panel = imports.ui.panel;
 const Tweener = imports.ui.tweener;
 
+const State = {
+    HIDDEN:  0,
+    SHOWING: 1,
+    SHOWN:   2,
+    HIDING:  3
+};
+
 function LayoutManager() {
     this._init.apply(this, arguments);
 }
@@ -44,8 +51,23 @@ LayoutManager.prototype = {
 
         this.topBox.height = Main.messageTray.actor.height;
         this.bottomBox.height = Main.keyboard.actor.height + Main.messageTray.actor.height;
-        this.keyboardVisible = Main.keyboard.actor.visible;
-        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
+
+        this._keyboardState = Main.keyboard.actor.visible ? State.SHOWN : State.HIDDEN;
+
+        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._setKeyboard));
+    },
+
+    _setKeyboard: function () {
+        this.topBox.y = - Main.messageTray.actor.height;
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+
+        if (this._keyboardState == State.SHOWN)
+            this.bottomBox.y = bottom - Main.keyboard.actor.height;
+        else {
+            this.bottomBox.y = bottom;
+            this._keyboardState = State.HIDDEN;
+        }
+
     },
 
     showKeyboard: function () {
@@ -55,7 +77,7 @@ LayoutManager.prototype = {
                            time: 0.5,
                            transition: 'easeOutQuad',
                          });
-        this.keyboardVisible = true;
+        this._keyboardState = State.SHOWN;
     },
 
     hideKeyboard: function () {
@@ -65,30 +87,17 @@ LayoutManager.prototype = {
                            time: 0.5,
                            transition: 'easeOutQuad'
                          });
-        this.keyboardVisible = false;
-    },
-
-    // Keyboard is not set until after call to Keyboard.Keyboard() therefore
-    // we need a way to distinguish whether the keyboard has been set during
-    // init process.
-    _updateForKeyboard: function () {
-        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
-        if (this.keyboardVisible)
-            this.bottomBox.y = bottom - Main.keyboard.actor.height;
-        else
-            this.bottomBox.y = bottom;
-        this.topBox.y = -Main.messageTray.actor.height;
+        this._keyboardState = State.HIDDEN;
     },
 
     updateForTray: function () {
-        if (this.keyboardVisible) {
+        this.keyboardVisible = this._keyboardState == State.SHOWN;
+        if (this._keyboardState == State.SHOWN) {
             this.traySummoned = !this.traySummoned;
             Main.messageTray.updateState();
         }
-        else {
+        else
             this.traySummoned = true;
-            this._updateForKeyboard();
-        }
     },
 
     _updateMonitors: function() {
