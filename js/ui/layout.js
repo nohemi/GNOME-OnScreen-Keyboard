@@ -23,7 +23,7 @@ LayoutManager.prototype = {
         this.bottomBox = new Clutter.Group();
         this.topBox = new Clutter.Group({ clip_to_allocation: true });
         this.bottomBox.add_actor(this.topBox);
-        this.traySummoned = true;
+        this.traySummoned = false;
 
         global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
         this._updateMonitors();
@@ -77,7 +77,7 @@ LayoutManager.prototype = {
             this.bottomBox.y = bottom - Main.keyboard.actor.height;
         else
             this.bottomBox.y = bottom;
-        this.topBox.y = -Main.messageTray.actor.height;;
+        this.topBox.y = -Main.messageTray.actor.height;
     },
 
     updateForTray: function () {
