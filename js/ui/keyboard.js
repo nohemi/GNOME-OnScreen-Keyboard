@@ -14,6 +14,7 @@ const St = imports.gi.St;
 const BoxPointer = imports.ui.boxpointer;
 const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
+const Tweener = imports.ui.tweener;
 
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD = 'show-keyboard';
@@ -492,12 +493,12 @@ Keyboard.prototype = {
     show: function () {
         this._redraw();
         this.actor.show();
-        this._current_page.show();
+        Main.layoutManager.showKeyboard();
     },
 
     hide: function () {
+        Main.layoutManager.hideKeyboard();
         this.actor.hide();
-        this._current_page.hide();
     },
 
     // Window placement method

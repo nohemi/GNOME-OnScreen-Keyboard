@@ -7,6 +7,7 @@ const St = imports.gi.St;
 
 const Main = imports.ui.main;
 const Panel = imports.ui.panel;
+const Tweener = imports.ui.tweener;
 
 function LayoutManager() {
     this._init.apply(this, arguments);
@@ -46,8 +47,26 @@ LayoutManager.prototype = {
 
         this.topBox.y = - Main.messageTray.actor.height;
 
-        Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._updateForKeyboard));
         Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
+    },
+
+    showKeyboard: function () {
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        this.bottomBox.show();
+        Tweener.addTween(this.bottomBox,
+                         { y: bottom - this.bottomBox.height,
+                           time: 0.5,
+                           transition: 'easeOutQuad'
+                         });
+    },
+
+    hideKeyboard: function () {
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        Tweener.addTween(this.bottomBox,
+                         { y: bottom,
+                           time: 0.5,
+                           transition: 'easeOutQuad'
+                         });
     },
 
     _updateForKeyboard: function () {
