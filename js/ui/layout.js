@@ -60,7 +60,6 @@ LayoutManager.prototype = {
     _setKeyboard: function () {
         this.topBox.y = - Main.messageTray.actor.height;
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
-
         if (this._keyboardState == State.SHOWN)
             this.bottomBox.y = bottom - Main.keyboard.actor.height;
         else {
@@ -72,8 +71,11 @@ LayoutManager.prototype = {
 
     showKeyboard: function () {
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        // Keyboard height cannot be found directly since the first
+        // call to this method may be when Keyboard.Keyboard() has
+        // not returned; therefore the keyboard would be null
         Tweener.addTween(this.bottomBox,
-                         { y: bottom - Main.keyboard.actor.height,
+                         { y: bottom - this.primaryMonitor.height / 3,
                            time: 0.5,
                            transition: 'easeOutQuad',
                          });
