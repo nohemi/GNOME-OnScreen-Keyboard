@@ -58,6 +58,9 @@ LayoutManager.prototype = {
     },
 
     _setKeyboard: function () {
+        if (Tweener.isTweening(this.bottomBox))
+            return;
+
         this.topBox.y = - Main.messageTray.actor.height;
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
         if (this._keyboardState == State.SHOWN)
