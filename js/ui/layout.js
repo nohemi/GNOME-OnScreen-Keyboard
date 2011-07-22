@@ -50,7 +50,7 @@ LayoutManager.prototype = {
         this._updateHotCorners();
 
         this.topBox.height = Main.messageTray.actor.height;
-        this.bottomBox.height = Main.keyboard.actor.height + Main.messageTray.actor.height;
+        this.topBox.y = - Main.messageTray.actor.height;
 
         this._keyboardState = Main.keyboard.actor.visible ? State.SHOWN : State.HIDDEN;
 
