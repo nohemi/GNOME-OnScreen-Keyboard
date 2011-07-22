@@ -426,7 +426,7 @@ Keyboard.prototype = {
         let keyHeight = Math.floor((maxHeight - allVerticalSpacing - 2 * padding) / this._numOfVertKeys);
 
         let keySize = Math.min(keyWidth, keyHeight);
-        this.actor.height = keySize * this._numOfVertKeys + allVerticalSpacing + 2 * this._padding;
+        this.actor.height = keySize * this._numOfVertKeys + allVerticalSpacing + 2 * padding;
 
         let rows = this._current_page.get_children();
         for (let i = 0; i < rows.length; ++i) {
