@@ -7,6 +7,14 @@ const St = imports.gi.St;
 
 const Main = imports.ui.main;
 const Panel = imports.ui.panel;
+const Tweener = imports.ui.tweener;
+
+const State = {
+    HIDDEN:  0,
+    SHOWING: 1,
+    SHOWN:   2,
+    HIDING:  3
+};
 
 function LayoutManager() {
     this._init.apply(this, arguments);
@@ -42,29 +50,57 @@ LayoutManager.prototype = {
         this._updateHotCorners();
 
         this.topBox.height = Main.messageTray.actor.height;
-        this.bottomBox.height = Main.keyboard.actor.height + Main.messageTray.actor.height;
-
         this.topBox.y = - Main.messageTray.actor.height;
 
-        Main.keyboard.actor.connect('notify::visible', Lang.bind(this, this._updateForKeyboard));
+        this._keyboardState = Main.keyboard.actor.visible ? State.SHOWN : State.HIDDEN;
+
         Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
     },
 
     _updateForKeyboard: function () {
+        if (Tweener.isTweening(this.bottomBox))
+            return;
+
+        this.topBox.y = - Main.messageTray.actor.height;
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
-        if (Main.keyboard.actor.visible)
+        if (this._keyboardState == State.SHOWN)
             this.bottomBox.y = bottom - Main.keyboard.actor.height;
-        else
+        else {
             this.bottomBox.y = bottom;
+            this._keyboardState = State.HIDDEN;
+        }
+
     },
 
-    updateForTray: function () {
-        if (Main.keyboard.actor.visible) {
-            this.traySummoned = !this.traySummoned;
-            Main.messageTray.updateState();
-        }
-        else
-            this.traySummoned = true;
+    updateForTray: function (traySummoned) {
+        this.keyboardVisible = this._keyboardState == State.SHOWN;
+        this.traySummoned = traySummoned;
+        Main.messageTray.updateState();
+    },
+
+    showKeyboard: function () {
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        // Keyboard height cannot be found directly since the first
+        // call to this method may be when Keyboard.Keyboard() has
+        // not returned; therefore the keyboard would be null
+        Tweener.addTween(this.bottomBox,
+                         { y: bottom - this.primaryMonitor.height / 3,
+                           time: 0.5,
+                           transition: 'easeOutQuad',
+                         });
+        this._keyboardState = State.SHOWN;
+        this.updateForTray(false);
+    },
+
+    hideKeyboard: function () {
+        let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
+        Tweener.addTween(this.bottomBox,
+                         { y: bottom,
+                           time: 0.5,
+                           transition: 'easeOutQuad'
+                         });
+        this._keyboardState = State.HIDDEN;
+        this.updateForTray(false);
     },
 
     _updateMonitors: function() {

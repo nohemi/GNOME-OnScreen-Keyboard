@@ -14,6 +14,8 @@ const St = imports.gi.St;
 const BoxPointer = imports.ui.boxpointer;
 const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
+const PopupMenu = imports.ui.popupMenu;
+const Tweener = imports.ui.tweener;
 
 const KEYBOARD_SCHEMA = 'org.gnome.shell.keyboard';
 const SHOW_KEYBOARD = 'show-keyboard';
@@ -260,9 +262,9 @@ Keyboard.prototype = {
         }
         else
             this.actor.disconnect(this._floatId);
-        if (this._showKeyboard) {
+        if (this._showKeyboard)
             this.show();
-        } else {
+        else {
             this.hide();
             this.destroySource();
         }
@@ -341,7 +343,7 @@ Keyboard.prototype = {
         let trayButton = new St.Button ({ label: "tray", style_class: 'keyboard-key' });
         trayButton.key_width = 1;
         trayButton.connect('button-press-event', Lang.bind(this, function () {
-            Main.layoutManager.updateForTray();
+            Main.layoutManager.updateForTray(!Main.layoutManager.traySummoned);
         }));
 
         Main.overview.connect('showing', Lang.bind(this, function () {
@@ -387,7 +389,6 @@ Keyboard.prototype = {
 
     _manageTray: function () {
         this.createSource();
-        Main.layoutManager.updateForTray();
     },
 
     _onPrefsClick: function () {
@@ -424,7 +425,7 @@ Keyboard.prototype = {
         let keyHeight = Math.floor((maxHeight - allVerticalSpacing - 2 * padding) / this._numOfVertKeys);
 
         let keySize = Math.min(keyWidth, keyHeight);
-        this.actor.height = keySize * this._numOfVertKeys + allVerticalSpacing + 2 * this._padding;
+        this.actor.height = keySize * this._numOfVertKeys + allVerticalSpacing + 2 * padding;
 
         let rows = this._current_page.get_children();
         for (let i = 0; i < rows.length; ++i) {
@@ -491,13 +492,11 @@ Keyboard.prototype = {
 
     show: function () {
         this._redraw();
-        this.actor.show();
-        this._current_page.show();
+        Main.layoutManager.showKeyboard();
     },
 
     hide: function () {
-        this.actor.hide();
-        this._current_page.hide();
+        Main.layoutManager.hideKeyboard();
     },
 
     // Window placement method
