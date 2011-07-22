@@ -83,6 +83,7 @@ LayoutManager.prototype = {
                            transition: 'easeOutQuad',
                          });
         this._keyboardState = State.SHOWN;
+        this.updateForTray(false);
     },
 
     hideKeyboard: function () {
@@ -93,16 +94,13 @@ LayoutManager.prototype = {
                            transition: 'easeOutQuad'
                          });
         this._keyboardState = State.HIDDEN;
+        this.updateForTray(false);
     },
 
-    updateForTray: function () {
+    updateForTray: function (traySummoned) {
         this.keyboardVisible = this._keyboardState == State.SHOWN;
-        if (this._keyboardState == State.SHOWN) {
-            this.traySummoned = !this.traySummoned;
-            Main.messageTray.updateState();
-        }
-        else
-            this.traySummoned = true;
+        this.traySummoned = traySummoned;
+        Main.messageTray.updateState();
     },
 
     _updateMonitors: function() {
