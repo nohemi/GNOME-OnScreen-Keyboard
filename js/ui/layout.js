@@ -6,6 +6,7 @@ const Signals = imports.signals;
 const St = imports.gi.St;
 
 const Main = imports.ui.main;
+const Meta = imports.gi.Meta;
 const Panel = imports.ui.panel;
 const Tweener = imports.ui.tweener;
 
@@ -54,7 +55,11 @@ LayoutManager.prototype = {
         this._keyboardState = Main.keyboard.actor.visible ? State.SHOWN : State.HIDDEN;
         this._traySummoned = true;
 
-        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
+        Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._reposition));
+    },
+
+    _reposition: function () {
+        Meta.later_add(Meta.LaterType.BEFORE_REDRAW, Lang.bind(this, function () { this._updateForKeyboard(); }));
     },
 
     _updateForKeyboard: function () {
