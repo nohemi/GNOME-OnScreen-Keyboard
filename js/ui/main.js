@@ -189,7 +189,6 @@ function start() {
     ExtensionSystem.loadExtensions();
 
     panel.startStatusArea();
-    panel.startupAnimation();
 
     global.display.connect('overlay-key', Lang.bind(overview, overview.toggle));
 
