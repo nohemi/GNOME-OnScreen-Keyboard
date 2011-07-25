@@ -30,7 +30,6 @@ LayoutManager.prototype = {
         this.bottomBox = new Clutter.Group();
         this.topBox = new Clutter.Group({ clip_to_allocation: true });
         this.bottomBox.add_actor(this.topBox);
-        this.traySummoned = false;
 
         global.screen.connect('monitors-changed', Lang.bind(this, this._monitorsChanged));
         this._updateMonitors();
@@ -53,6 +52,7 @@ LayoutManager.prototype = {
         this.topBox.y = - Main.messageTray.actor.height;
 
         this._keyboardState = Main.keyboard.actor.visible ? State.SHOWN : State.HIDDEN;
+        this._traySummoned = true;
 
         Main.keyboard.actor.connect('allocation-changed', Lang.bind(this, this._updateForKeyboard));
     },
@@ -72,10 +72,21 @@ LayoutManager.prototype = {
 
     },
 
-    updateForTray: function (traySummoned) {
-        this.keyboardVisible = this._keyboardState == State.SHOWN;
-        this.traySummoned = traySummoned;
-        Main.messageTray.updateState();
+    updateForTray: function () {
+        if (this._keyboardState == State.SHOWN) {
+            if (this._traySummoned) {
+                Main.messageTray.lock();
+                this._traySummoned = false;
+            }
+            else {
+                Main.messageTray.unlock();
+                this._traySummoned = true;
+            }
+        }
+        else {
+            Main.messageTray.unlock();
+            this._traySummoned = false;
+        }
     },
 
     showKeyboard: function () {
@@ -89,7 +100,7 @@ LayoutManager.prototype = {
                            transition: 'easeOutQuad',
                          });
         this._keyboardState = State.SHOWN;
-        this.updateForTray(false);
+        this.updateForTray();
     },
 
     hideKeyboard: function () {
@@ -100,7 +111,7 @@ LayoutManager.prototype = {
                            transition: 'easeOutQuad'
                          });
         this._keyboardState = State.HIDDEN;
-        this.updateForTray(false);
+        this.updateForTray();
     },
 
     _updateMonitors: function() {

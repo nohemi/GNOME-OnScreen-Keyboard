@@ -343,7 +343,7 @@ Keyboard.prototype = {
         let trayButton = new St.Button ({ label: "tray", style_class: 'keyboard-key' });
         trayButton.key_width = 1;
         trayButton.connect('button-press-event', Lang.bind(this, function () {
-            Main.layoutManager.updateForTray(!Main.layoutManager.traySummoned);
+            Main.layoutManager.updateForTray();
         }));
 
         Main.overview.connect('showing', Lang.bind(this, function () {
