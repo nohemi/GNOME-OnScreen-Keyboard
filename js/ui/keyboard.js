@@ -224,6 +224,9 @@ Keyboard.prototype = {
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._redraw));
 
         Main.layoutManager.bottomBox.add_actor(this.actor);
+    },
+
+    init: function () {
         this._display();
     },
 

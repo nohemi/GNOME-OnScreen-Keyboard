@@ -151,6 +151,7 @@ function start() {
 
     // Now the rest of the JS modules (arbitrarily in alphabetical
     // order).
+    keyboard.init();
     magnifier = new Magnifier.Magnifier();
     notificationDaemon = new NotificationDaemon.NotificationDaemon();
     placesManager = new PlaceDisplay.PlacesManager();

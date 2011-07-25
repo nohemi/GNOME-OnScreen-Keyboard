@@ -100,7 +100,7 @@ LayoutManager.prototype = {
         // call to this method may be when Keyboard.Keyboard() has
         // not returned; therefore the keyboard would be null
         Tweener.addTween(this.bottomBox,
-                         { y: bottom - this.primaryMonitor.height / 3,
+                         { y: bottom - Main.keyboard.actor.height,
                            time: 0.5,
                            transition: 'easeOutQuad',
                          });
