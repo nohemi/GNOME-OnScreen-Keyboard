@@ -1946,7 +1946,7 @@ MessageTray.prototype = {
 
     _showTray: function() {
         this._tween(this.actor, '_trayState', State.SHOWN,
-                    { y: 0,
+                    { y: Main.layoutManager.topBox.height - this.actor.height,
                       time: ANIMATION_TIME,
                       transition: 'easeOutQuad'
                     });

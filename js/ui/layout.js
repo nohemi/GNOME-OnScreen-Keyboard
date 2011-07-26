@@ -51,8 +51,8 @@ LayoutManager.prototype = {
     _finishInit: function() {
         this._updateHotCorners();
 
-        this.topBox.height = Main.messageTray.actor.height;
-        this.topBox.y = - Main.messageTray.actor.height;
+        this.topBox.height = 2 / 3 * this.bottomMonitor.height;
+        this.topBox.y = - this.topBox.height;
 
         this._keyboardState = Main.keyboard.actor.visible ? State.SHOWN : State.HIDDEN;
         this._traySummoned = true;
@@ -68,7 +68,6 @@ LayoutManager.prototype = {
         if (Tweener.isTweening(this.bottomBox))
             return;
 
-        this.topBox.y = - Main.messageTray.actor.height;
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
         if (this._keyboardState == State.SHOWN)
             this.bottomBox.y = bottom - Main.keyboard.actor.height;
