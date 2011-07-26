@@ -19,6 +19,7 @@ const EndSessionDialog = imports.ui.endSessionDialog;
 const PolkitAuthenticationAgent = imports.ui.polkitAuthenticationAgent;
 const Environment = imports.ui.environment;
 const ExtensionSystem = imports.ui.extensionSystem;
+const Keyboard = imports.ui.keyboard;
 const MessageTray = imports.ui.messageTray;
 const Overview = imports.ui.overview;
 const Panel = imports.ui.panel;
@@ -62,6 +63,7 @@ let uiGroup = null;
 let magnifier = null;
 let xdndHandler = null;
 let statusIconDispatcher = null;
+let keyboard = null;
 let layoutManager = null;
 let _errorLogStack = [];
 let _startDate;
@@ -140,6 +142,7 @@ function start() {
     panel = new Panel.Panel();
     wm = new WindowManager.WindowManager();
     messageTray = new MessageTray.MessageTray();
+    keyboard = new Keyboard.Keyboard();
     notificationDaemon = new NotificationDaemon.NotificationDaemon();
     windowAttentionHandler = new WindowAttentionHandler.WindowAttentionHandler();
     telepathyClient = new TelepathyClient.Client();
@@ -147,6 +150,7 @@ function start() {
     autorunManager = new AutorunManager.AutorunManager();
 
     layoutManager.init();
+    keyboard.init();
     overview.init();
     statusIconDispatcher.start(messageTray.actor);
 

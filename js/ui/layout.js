@@ -14,8 +14,8 @@ const ScreenSaver = imports.misc.screenSaver;
 const Tweener = imports.ui.tweener;
 
 const HOT_CORNER_ACTIVATION_TIMEOUT = 0.5;
-
 const STARTUP_ANIMATION_TIME = 0.2;
+const KEYBOARD_ANIMATION_TIME = 0.5;
 
 function LayoutManager() {
     this._init.apply(this, arguments);
@@ -48,6 +48,9 @@ LayoutManager.prototype = {
         this.trayBox.connect('allocation-changed',
                              Lang.bind(this, this._updateTrayBarrier));
         this._bottomBox.add_actor(this.trayBox);
+
+        this.keyboardBox = new St.BoxLayout({ name: 'keyboardBox' });
+        this._bottomBox.add_actor(this.keyboardBox);
 
         global.screen.connect('monitors-changed',
                               Lang.bind(this, this._monitorsChanged));
@@ -152,6 +155,13 @@ LayoutManager.prototype = {
         this._bottomBox.set_size(this.bottomMonitor.width, -1);
 
         this.trayBox.width = this.bottomMonitor.width;
+
+        // Set trayBox's clip to show things above it, but not below
+        // it (so it's not visible behind the keyboard). The exact
+        // height of the clip doesn't matter, as long as it's taller
+        // than any Notification.actor.
+        this.trayBox.set_clip(0, -this.bottomMonitor.height,
+                              this.bottomMonitor.width, this.bottomMonitor.height);
     },
 
     _updatePanelBarriers: function() {
@@ -241,6 +251,34 @@ LayoutManager.prototype = {
         Tweener.addTween(this.panelBox,
                          { anchor_y: 0,
                            time: STARTUP_ANIMATION_TIME,
+                           transition: 'easeOutQuad'
+                         });
+    },
+
+    showKeyboard: function () {
+        Tweener.addTween(this._bottomBox,
+                         { anchor_y: this._bottomBox.height,
+                           time: KEYBOARD_ANIMATION_TIME,
+                           transition: 'easeOutQuad',
+                           onComplete: this._showKeyboardComplete,
+                           onCompleteScope: this
+                         });
+    },
+
+    _showKeyboardComplete: function() {
+        // Poke Chrome to update the input shape; it doesn't notice
+        // anchor point changes
+        this._chrome.updateRegions();
+
+        this._bottomBox.connect('notify::height', Lang.bind(this, function () {
+            this._bottomBoxAnchor = this._bottomBox.height;
+        }));
+    },
+
+    hideKeyboard: function () {
+        Tweener.addTween(this._bottomBox,
+                         { anchor_y: 0,
+                           time: KEYBOARD_ANIMATION_TIME,
                            transition: 'easeOutQuad'
                          });
     },
@@ -685,7 +723,7 @@ Chrome.prototype = {
 
     _queueUpdateRegions: function() {
         if (!this._updateRegionIdle)
-            this._updateRegionIdle = Mainloop.idle_add(Lang.bind(this, this._updateRegions),
+            this._updateRegionIdle = Mainloop.idle_add(Lang.bind(this, this.updateRegions),
                                                        Meta.PRIORITY_BEFORE_REDRAW);
     },
 
@@ -754,10 +792,13 @@ Chrome.prototype = {
         }
     },
 
-    _updateRegions: function() {
+    updateRegions: function() {
         let rects = [], struts = [], i;
 
-        delete this._updateRegionIdle;
+        if (this._updateRegionIdle) {
+            Mainloop.source_remove(this._updateRegionIdle);
+            delete this._updateRegionIdle;
+        }
 
         for (i = 0; i < this._trackedActors.length; i++) {
             let actorData = this._trackedActors[i];
