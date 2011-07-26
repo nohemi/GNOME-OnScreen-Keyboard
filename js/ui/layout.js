@@ -80,19 +80,13 @@ LayoutManager.prototype = {
 
     updateForTray: function () {
         if (this._keyboardState == State.SHOWN) {
-            if (this._traySummoned) {
+            if (Main.messageTray.locked == 0)
                 Main.messageTray.lock();
-                this._traySummoned = false;
-            }
-            else {
+            else
                 Main.messageTray.unlock();
-                this._traySummoned = true;
-            }
         }
-        else {
+        else
             Main.messageTray.unlock();
-            this._traySummoned = false;
-        }
     },
 
     showKeyboard: function () {
@@ -105,8 +99,8 @@ LayoutManager.prototype = {
                            time: 0.5,
                            transition: 'easeOutQuad',
                          });
-        this._keyboardState = State.SHOWN;
         this.updateForTray();
+        this._keyboardState = State.SHOWN;
     },
 
     hideKeyboard: function () {
