@@ -90,6 +90,9 @@ LayoutManager.prototype = {
     },
 
     showKeyboard: function () {
+        if (this._keyboardState == State.SHOWN)
+            return;
+
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
         // Keyboard height cannot be found directly since the first
         // call to this method may be when Keyboard.Keyboard() has
@@ -104,6 +107,9 @@ LayoutManager.prototype = {
     },
 
     hideKeyboard: function () {
+        if (this._keyboardState == State.HIDDEN)
+            return;
+
         let bottom = this.bottomMonitor.y + this.bottomMonitor.height;
         Tweener.addTween(this.bottomBox,
                          { y: bottom,
