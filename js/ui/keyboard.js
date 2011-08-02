@@ -44,11 +44,11 @@ const PRETTY_KEYS = {
 const CaribouKeyboardIface = {
     name: 'org.gnome.Caribou.Keyboard',
     methods:    [ { name: 'Show',
-                    inSignature: '',
+                    inSignature: 'u',
                     outSignature: ''
                   },
                   { name: 'Hide',
-                    inSignature: '',
+                    inSignature: 'u',
                     outSignature: ''
                   },
                   { name: 'SetCursorLocation',
@@ -214,6 +214,7 @@ Keyboard.prototype = {
         DBus.session.exportObject('/org/gnome/Caribou/Keyboard', this);
         DBus.session.acquire_name('org.gnome.Caribou.Keyboard', 0, null, null);
 
+        this._timestamp = global.get_current_time();
         this.actor = new St.BoxLayout({ name: 'keyboard', vertical: true, reactive: true });
 
         this._keyboardSettings = new Gio.Settings({ schema: KEYBOARD_SCHEMA });
@@ -542,12 +543,20 @@ Keyboard.prototype = {
     },
 
     // D-Bus methods
-    Show: function() {
+    Show: function(timestamp) {
+        if (timestamp - this._timestamp <= 0)
+            return;
+
+        this._timestamp = timestamp;
         this.destroySource();
         this.show();
     },
 
-    Hide: function() {
+    Hide: function(timestamp) {
+        if (timestamp - this._timestamp <= 0)
+            return;
+
+        this._timestamp = timestamp;
         if (this._currentWindow) {
             this._currentWindow.move_frame(true, this._currentWindow.x, this._currentWindow.y);
             this._currentWindow = null;
