@@ -544,7 +544,7 @@ Keyboard.prototype = {
 
     // D-Bus methods
     Show: function(timestamp) {
-        if (timestamp - this._timestamp <= 0)
+        if (timestamp - this._timestamp < 0)
             return;
 
         this._timestamp = timestamp;
@@ -553,7 +553,7 @@ Keyboard.prototype = {
     },
 
     Hide: function(timestamp) {
-        if (timestamp - this._timestamp <= 0)
+        if (timestamp - this._timestamp < 0)
             return;
 
         this._timestamp = timestamp;
