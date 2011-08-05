@@ -222,6 +222,8 @@ Keyboard.prototype = {
 
         this._setupKeyboard();
 
+        global.stage.connect('notify::key-focus', Lang.bind(this, this._onKeyFocusChanged));
+
         Main.layoutManager.connect('monitors-changed', Lang.bind(this, this._redraw));
 
         Main.layoutManager.bottomBox.add_actor(this.actor);
@@ -270,9 +272,19 @@ Keyboard.prototype = {
         this.hide();
 
         if (this._showKeyboard)
-            this.createSource();
+            this._createSource();
         else
-            this.destroySource();
+            this._destroySource();
+    },
+
+    _onKeyFocusChanged: function () {
+        let focus = global.stage.key_focus;
+        if (this._showKeyboard) {
+            if (focus && focus instanceof Clutter.Text)
+                this.show();
+            else
+                this.hide();
+        }
     },
 
     _startDragging: function (actor, event) {
@@ -380,7 +392,7 @@ Keyboard.prototype = {
                 else
                     left_box.add(button.actor);
                 if (key.name == "Caribou_Prefs") {
-                    key.connect('key-released', Lang.bind(this, this._onPrefsClick));
+                    key.connect('key-released', Lang.bind(this, this.hide));
 
                     // Add new key for hiding message tray
                     right_box.add(this._getTrayIcon());
@@ -390,11 +402,6 @@ Keyboard.prototype = {
             keyboard_row.add(right_box, { expand: true, x_fill: false, x_align: St.Align.END });
         }
         layout.add(keyboard_row);
-    },
-
-    _onPrefsClick: function () {
-        this.hide();
-        this.createSource();
     },
 
     _loadRows : function (level, layout) {
@@ -477,7 +484,7 @@ Keyboard.prototype = {
         this._current_page.show();
     },
 
-    createSource: function () {
+    _createSource: function () {
         if (this._source == null) {
             this._source = new KeyboardSource(this);
             this._source.setTransient(true);
@@ -485,7 +492,7 @@ Keyboard.prototype = {
         }
     },
 
-    destroySource: function () {
+    _destroySource: function () {
         if (this._source) {
             this._source.destroy();
             this._source = null;
@@ -495,10 +502,12 @@ Keyboard.prototype = {
     show: function () {
         this._redraw();
         Main.layoutManager.showKeyboard();
+        this._destroySource();
     },
 
     hide: function () {
         Main.layoutManager.hideKeyboard();
+        this._createSource();
     },
 
     // Window placement method
@@ -546,7 +555,6 @@ Keyboard.prototype = {
             return;
 
         this._timestamp = timestamp;
-        this.destroySource();
         this.show();
     },
 
@@ -556,7 +564,6 @@ Keyboard.prototype = {
 
         this._timestamp = timestamp;
         this.hide();
-        this.createSource();
     },
 
     SetCursorLocation: function(x, y, w, h) {
@@ -607,6 +614,5 @@ KeyboardSource.prototype = {
 
     open: function() {
         this._keyboard.show();
-        this._keyboard.destroySource();
     }
 };
