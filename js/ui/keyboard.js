@@ -266,12 +266,13 @@ Keyboard.prototype = {
         }
         else
             this.actor.disconnect(this._floatId);
+
+        this.hide();
+
         if (this._showKeyboard)
-            this.show();
-        else {
-            this.hide();
+            this.createSource();
+        else
             this.destroySource();
-        }
     },
 
     _startDragging: function (actor, event) {
@@ -391,13 +392,9 @@ Keyboard.prototype = {
         layout.add(keyboard_row);
     },
 
-    _manageTray: function () {
-        this.createSource();
-    },
-
     _onPrefsClick: function () {
         this.hide();
-        this._manageTray();
+        this.createSource();
     },
 
     _loadRows : function (level, layout) {
@@ -558,7 +555,7 @@ Keyboard.prototype = {
 
         this._timestamp = timestamp;
         this.hide();
-        this._manageTray();
+        this.createSource();
     },
 
     SetCursorLocation: function(x, y, w, h) {
