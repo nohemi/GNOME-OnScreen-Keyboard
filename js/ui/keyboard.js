@@ -480,6 +480,7 @@ Keyboard.prototype = {
     createSource: function () {
         if (this._source == null) {
             this._source = new KeyboardSource(this);
+            this._source.setTransient(true);
             Main.messageTray.add(this._source);
         }
     },
