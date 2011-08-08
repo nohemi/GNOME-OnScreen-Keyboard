@@ -280,8 +280,11 @@ Keyboard.prototype = {
         if (this._showKeyboard) {
             if (focus && focus instanceof Clutter.Text)
                 this.show();
-            else
-                this.hide();
+            else {
+                // this.hide();
+                // Hiding here breaks extended key usage... need to
+                // think about this more...
+            }
         }
     },
 
