@@ -21,6 +21,7 @@ const ENABLE_DRAGGABLE = 'enable-drag';
 const ENABLE_FLOAT = 'enable-float';
 
 // Key constants taken from Antler
+// FIXME: ought to be moved into libcaribou
 const PRETTY_KEYS = {
     'BackSpace': '\u232b',
     'space': ' ',
