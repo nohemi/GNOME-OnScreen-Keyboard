@@ -91,14 +91,6 @@
       <_description>
         The type of keyboard to use.
       </_description>
-    </key>
-    <key name="enable-drag" type="b">
-      <default>false</default>
-      <_summary>Enable keyboard dragging</_summary>
-      <_description>
-        If true, enable keyboard dragging.
-      </_description>
-    </key>
     <key name="enable-float" type="b">
       <default>false</default>
       <_summary>Enable floating keyboard</_summary>

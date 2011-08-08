@@ -120,7 +120,6 @@ Key.prototype = {
         button.width = this._width;
         button.key_width = this._key.width;
         button.height = this._height;
-        button.draggable = false;
         button.connect('button-press-event', Lang.bind(this, function () { this._key.press(); }));
         button.connect('button-release-event', Lang.bind(this, function () { this._key.release(); }));
 
@@ -147,7 +146,6 @@ Key.prototype = {
             key.extended_key = extended_key;
             key.width = this._width;
             key.height = this._height;
-            key.draggable = false;
             key.connect('button-press-event', Lang.bind(this, function () { extended_key.press(); }));
             key.connect('button-release-event', Lang.bind(this, function () { extended_key.release(); }));
             this._extended_keyboard.add(key);
@@ -157,17 +155,12 @@ Key.prototype = {
 
     _onEventCapture: function (actor, event) {
         let source = event.get_source();
-        if (event.type() == Clutter.EventType.BUTTON_PRESS ||
-            (event.type() == Clutter.EventType.BUTTON_RELEASE && source.draggable)) {
+        if ((event.type() == Clutter.EventType.BUTTON_RELEASE)) {
             if (this._extended_keyboard.contains(source)) {
-                if (source.draggable) {
-                    source.extended_key.press();
-                    source.extended_key.release();
-                }
-                this._ungrab();
+                source.extended_key.press();
+                source.extended_key.release();
                 return false;
             }
-            this._boxPointer.actor.hide();
             this._ungrab();
             return true;
         }
@@ -258,7 +251,6 @@ Keyboard.prototype = {
             this._setupKeyboard();
 
         this._showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
-        this._draggable = this._keyboardSettings.get_boolean(ENABLE_DRAGGABLE);
         this._floating = this._keyboardSettings.get_boolean(ENABLE_FLOAT);
         if (this._floating) {
              this._floatId = this.actor.connect('button-press-event', Lang.bind(this, this._startDragging));
@@ -446,14 +438,12 @@ Keyboard.prototype = {
                     let child = keys[k];
                     child.width = keySize * child.key_width;
                     child.height = keySize;
-                    child.draggable = this._draggable;
                     if (child._extended_keys) {
                         let extended_keys = child._extended_keys.get_children();
                         for (let n = 0; n < extended_keys.length; ++n) {
                             let extended_key = extended_keys[n];
                             extended_key.width = keySize;
                             extended_key.height = keySize;
-                            extended_key.draggable = this._draggable;
                         }
                     }
                 }
