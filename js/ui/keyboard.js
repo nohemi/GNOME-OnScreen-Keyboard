@@ -185,7 +185,7 @@ Key.prototype = {
         if (this._key.show_subkeys) {
             this.actor.fake_release();
             this._boxPointer.actor.raise_top();
-            this._boxPointer.setPosition(this.actor, 5, 0.5);
+            this._boxPointer.setPosition(this.actor, 0.5);
             this._boxPointer.show(true);
             this.actor.set_hover(false);
             if (!this._grabbed) {

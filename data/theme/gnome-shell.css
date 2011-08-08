@@ -1910,4 +1910,5 @@ StTooltip StLabel {
     -arrow-border-color: white;
     -arrow-base: 20px;
     -arrow-rise: 10px;
+    -boxpointer-gap: 5px;
 }
