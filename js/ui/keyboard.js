@@ -251,13 +251,6 @@ Keyboard.prototype = {
             this._setupKeyboard();
 
         this._showKeyboard = this._keyboardSettings.get_boolean(SHOW_KEYBOARD);
-        this._floating = this._keyboardSettings.get_boolean(ENABLE_FLOAT);
-        if (this._floating) {
-             this._floatId = this.actor.connect('button-press-event', Lang.bind(this, this._startDragging));
-             this._dragging = false;
-        }
-        else
-            this.actor.disconnect(this._floatId);
 
         this.hide();
 
@@ -278,50 +271,6 @@ Keyboard.prototype = {
                 // think about this more...
             }
         }
-    },
-
-    _startDragging: function (actor, event) {
-        if (this._dragging) // don't allow two drags at the same time
-            return;
-        this._dragging = true;
-        this._preDragStageMode = global.stage_input_mode;
-
-        Clutter.grab_pointer(this.actor);
-        global.set_stage_input_mode(Shell.StageInputMode.FULLSCREEN);
-
-        this._releaseId = this.actor.connect('button-release-event', Lang.bind(this, this._endDragging));
-        this._motionId = this.actor.connect('motion-event', Lang.bind(this, this._motionEvent));
-        [this._dragStartX, this._dragStartY] = event.get_coords();
-        [this._currentX, this._currentY] = this.actor.get_position();
-    },
-
-    _endDragging: function () {
-        if (this._dragging) {
-            this.actor.disconnect(this._releaseId);
-            this.actor.disconnect(this._motionId);
-
-            Clutter.ungrab_pointer();
-            global.set_stage_input_mode(this._preDragStageMode);
-            global.unset_cursor();
-            this._dragging = false;
-        }
-        return true;
-    },
-
-    _motionEvent: function(actor, event) {
-        let absX, absY;
-        [absX, absY] = event.get_coords();
-        global.set_cursor(Shell.Cursor.DND_IN_DRAG);
-        this._moveHandle(absX, absY);
-        return true;
-    },
-
-    _moveHandle: function (stageX, stageY) {
-        let x, y;
-        x = stageX - this._dragStartX + this._currentX;
-        y = stageY - this._dragStartY + this._currentY;
-        this.actor.set_position(x,y);
-
     },
 
     _addKeys: function () {
@@ -501,25 +450,6 @@ Keyboard.prototype = {
         this._createSource();
     },
 
-    // Window placement method
-    _updatePosition: function (x, y) {
-        let primary = Main.layoutManager.primaryMonitor;
-        x -= this.actor.width / 2;
-        // Determines bottom/top centered
-        if (y <= primary.height / 2)
-            y += this.actor.height / 2;
-        else
-            y -= 3 * this.actor.height / 2;
-
-        // Accounting for monitor boundaries
-        if (x < primary.x)
-            x = primary.x;
-        if (x + this.actor.width > primary.width)
-            x = primary.width - this.actor.width;
-
-        this.actor.set_position(x, y);
-    },
-
     _moveTemporarily: function () {
         let currentWindow = global.screen.get_display().focus_window;
         let rect = currentWindow.get_outer_rect();
@@ -530,12 +460,8 @@ Keyboard.prototype = {
     },
 
     _setLocation: function (x, y) {
-        if (this._floating)
-            this._updatePosition(x, y);
-        else {
-            if (y >= 2 * this.actor.height)
-                this._moveTemporarily();
-        }
+        if (y >= 2 * this.actor.height)
+            this._moveTemporarily();
     },
 
     // D-Bus methods
