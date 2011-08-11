@@ -519,9 +519,6 @@ KeyboardSource.prototype = {
         if (event.type() != Clutter.EventType.BUTTON_RELEASE)
             return false;
 
-        if (event.get_button() != 1)
-            return false;
-
         this.open();
         return true;
     },
