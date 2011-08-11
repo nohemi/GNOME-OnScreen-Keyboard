@@ -239,8 +239,6 @@ Keyboard.prototype = {
         this._numOfHorizKeys = 0;
         this._numOfVertKeys = 0;
 
-        this._floatId = 0;
-
         this._addKeys();
 
         this._keyboardNotifyId = this._keyboard.connect('notify::active-group', Lang.bind(this, this._onGroupChanged));
@@ -441,6 +439,7 @@ Keyboard.prototype = {
 
     show: function () {
         this._redraw();
+
         Main.layoutManager.showKeyboard();
         this._destroySource();
     },
