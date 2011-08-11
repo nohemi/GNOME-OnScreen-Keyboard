@@ -440,11 +440,13 @@ Keyboard.prototype = {
     show: function () {
         this._redraw();
 
+        Main.messageTray.hide();
         Main.layoutManager.showKeyboard();
         this._destroySource();
     },
 
     hide: function () {
+        Main.messageTray.hide();
         Main.layoutManager.hideKeyboard();
         this._createSource();
     },

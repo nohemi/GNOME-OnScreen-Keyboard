@@ -1530,6 +1530,13 @@ MessageTray.prototype = {
         this._updateState();
     },
 
+    hide: function() {
+        this._traySummoned = false;
+        this.actor.set_hover(false);
+        this._summary.set_hover(false);
+        this._updateState();
+    },
+
     _onNotify: function(source, notification) {
         if (this._summaryBoxPointerItem && this._summaryBoxPointerItem.source == source) {
             if (this._summaryBoxPointerState == State.HIDING)
