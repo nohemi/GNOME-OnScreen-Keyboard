@@ -76,7 +76,7 @@ Key.prototype = {
         this.actor = this._getKey();
 
         this._extended_keys = this._key.get_extended_keys();
-        this._extended_keyboard = {};
+        this._extended_keyboard = null;
 
         if (this._key.name == "Control_L" || this._key.name == "Alt_L")
             this._key.latch = true;
@@ -262,13 +262,16 @@ Keyboard.prototype = {
 
     _onKeyFocusChanged: function () {
         let focus = global.stage.key_focus;
-        if (this._showKeyboard) {
-            if (focus && focus instanceof Clutter.Text)
+
+        if (global.stage.key_focus == global.stage)
+            return;
+
+        if (this._showKeyboard && focus) {
+            if (focus instanceof Clutter.Text)
                 this.show();
             else {
-                // this.hide();
-                // Hiding here breaks extended key usage... need to
-                // think about this more...
+                if (focus._extended_keys == null)
+                   this.hide();
             }
         }
     },
