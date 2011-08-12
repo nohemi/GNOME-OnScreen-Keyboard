@@ -155,12 +155,13 @@ Key.prototype = {
 
     _onEventCapture: function (actor, event) {
         let source = event.get_source();
-        if ((event.type() == Clutter.EventType.BUTTON_PRESS)) {
-            if (this._extended_keyboard.contains(source)) {
-                source.extended_key.press();
-                source.extended_key.release();
-                return false;
-            }
+        if ((event.type() == Clutter.EventType.BUTTON_PRESS ||
+            event.type() == Clutter.EventType.BUTTON_RELEASE) && this._extended_keyboard.contains(source)) {
+            source.extended_key.press();
+            source.extended_key.release();
+            return false;
+        }
+        if (event.type() == Clutter.EventType.BUTTON_PRESS) {
             this._boxPointer.actor.hide();
             this._ungrab();
             return true;
